@@ -347,7 +347,7 @@ BOOL FBIsDeviceIPad() {
     [self addSubview:_webView];
 
     _spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:
-      UIActivityIndicatorViewStyleWhiteLarge];
+      UIActivityIndicatorViewStyleGray];
     _spinner.autoresizingMask =
       UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin
       | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
@@ -430,7 +430,13 @@ BOOL FBIsDeviceIPad() {
   }
 }
 
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+  [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
+  [_spinner startAnimating];
+}
+
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
+  [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
   [_spinner stopAnimating];
   _spinner.hidden = YES;
 
@@ -542,7 +548,6 @@ BOOL FBIsDeviceIPad() {
 }
 
 - (void)loadURL:(NSString*)url get:(NSDictionary*)getParams {
-
   [_loadingURL release];
   _loadingURL = [[self generateURL:url params:getParams] retain];
   NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:_loadingURL];
@@ -584,7 +589,6 @@ BOOL FBIsDeviceIPad() {
     self.frame.size.height - (_titleLabel.frame.size.height + 1 + kBorderWidth*2));
 
   [_spinner sizeToFit];
-  [_spinner startAnimating];
   _spinner.center = _webView.center;
 
   UIWindow* window = [UIApplication sharedApplication].keyWindow;
