@@ -259,6 +259,7 @@
 				GCC_PREFIX_HEADER = facebook_ios_sdk_Prefix.pch;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = facebook_ios_sdk;
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
@@ -273,6 +274,7 @@
 				GCC_PREFIX_HEADER = facebook_ios_sdk_Prefix.pch;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = facebook_ios_sdk;
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
@@ -289,6 +291,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
@@ -304,6 +307,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PREBINDING = NO;
 				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
