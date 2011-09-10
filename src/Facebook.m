@@ -312,18 +312,18 @@ static NSString* kSDKVersion = @"2";
   if (!accessToken) {
     NSString *errorReason = [params valueForKey:@"error"];
 
-    // If the error response indicates that we should try again using Safari, open
-    // the authorization dialog in Safari.
-    if (errorReason && [errorReason isEqualToString:@"service_disabled_use_browser"]) {
-      [self authorizeWithFBAppAuth:NO safariAuth:YES];
-      return YES;
-    }
-
-    // If the error response indicates that we should try the authorization flow
-    // in an inline dialog, do that.
-    if (errorReason && [errorReason isEqualToString:@"service_disabled"]) {
-      [self authorizeWithFBAppAuth:NO safariAuth:NO];
-      return YES;
+    if (errorReason) {
+        // If the error response indicates that we should try again using Safari, open
+        // the authorization dialog in Safari.
+        if ([errorReason isEqualToString:@"service_disabled_use_browser"]) {
+            [self authorizeWithFBAppAuth:NO safariAuth:YES];
+        }
+        // Any other error response indicates that we should try the authorization flow
+        // in an inline dialog
+        else {
+            [self authorizeWithFBAppAuth:NO safariAuth:NO];
+        }
+        return YES;
     }
 
     // The facebook app may return an error_code parameter in case it
@@ -346,18 +346,16 @@ static NSString* kSDKVersion = @"2";
       expirationDate = [NSDate dateWithTimeIntervalSinceNow:expVal];
     }
   }
-
   [self fbDialogLogin:accessToken expirationDate:expirationDate];
   return YES;
 }
 
 /**
  * Invalidate the current user session by removing the access token in
- * memory, clearing the browser cookie, and calling auth.expireSession
- * through the API.
+ * memory and clearing the browser cookie.
  *
  * Note that this method dosen't unauthorize the application --
- * it just invalidates the access token. To unauthorize the application,
+ * it just removes the access token. To unauthorize the application,
  * the user must remove the app in the app settings page under the privacy
  * settings screen on facebook.com.
  *
@@ -368,13 +366,6 @@ static NSString* kSDKVersion = @"2";
 - (void)logout:(id<FBSessionDelegate>)delegate {
 
   self.sessionDelegate = delegate;
-
-  NSMutableDictionary * params = [[NSMutableDictionary alloc] init];
-  [self requestWithMethodName:@"auth.expireSession"
-                    andParams:params andHttpMethod:@"GET"
-                  andDelegate:nil];
-
-  [params release];
   [_accessToken release];
   _accessToken = nil;
   [_expirationDate release];
