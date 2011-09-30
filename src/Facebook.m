@@ -617,7 +617,7 @@ static NSString* kSDKVersion = @"2";
 + (BOOL)openPage:(unsigned long long)uid {
 	NSString *fburl = [NSString stringWithFormat:@"fb://profile/%lld",uid];
 	if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:fburl]] == NO) {
-		NSString *url = [NSString stringWithFormat:@"http://m.facebook.com/#!/profile.php?id=%lld",uid];
+		NSString *url = [NSString stringWithFormat:@"http://touch.facebook.com/profile.php?id=%lld",uid];
 		return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 	}
 	return NO;
