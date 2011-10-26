@@ -18,7 +18,6 @@
 #import "FBLoginDialog.h"
 #import "FBRequest.h"
 
-static NSString* kDialogBaseURL = @"https://m.facebook.com/dialog/";
 static NSString* kGraphBaseURL = @"https://graph.facebook.com/";
 static NSString* kRestserverBaseURL = @"https://api.facebook.com/method/";
 
@@ -622,7 +621,7 @@ static NSString* kSDKVersion = @"2";
  */
 
 + (BOOL)openPage:(unsigned long long)uid {
-	NSString *fburl = [NSString stringWithFormat:@"fb://profile/%lld",uid];
+	NSString *fburl = [NSString stringWithFormat:@"fb://page/%lld",uid];
 	if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:fburl]] == NO) {
 		NSString *url = [NSString stringWithFormat:@"http://touch.facebook.com/profile.php?id=%lld",uid];
 		return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
