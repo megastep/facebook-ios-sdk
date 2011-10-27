@@ -287,7 +287,7 @@ params   = _params;
 // NSObject
 
 - (id)init {
-    if (self == [super initWithFrame:CGRectZero]) {
+    if ((self = [super initWithFrame:CGRectZero]) != nil) {
         _delegate = nil;
         _loadingURL = nil;
         _orientation = [UIApplication sharedApplication].statusBarOrientation;
