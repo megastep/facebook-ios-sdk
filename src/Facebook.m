@@ -615,20 +615,6 @@ static NSString* kSDKVersion = @"2";
 
 }
 
-/**
- * Open a Facebook page in the FB app or Safari.
- * @return boolean - whether the page was successfully opened.
- */
-
-+ (BOOL)openPage:(unsigned long long)uid {
-	NSString *fburl = [NSString stringWithFormat:@"fb://page/%lld",uid];
-	if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:fburl]] == NO) {
-		NSString *url = [NSString stringWithFormat:@"http://touch.facebook.com/profile.php?id=%lld",uid];
-		return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
-	}
-	return NO;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //FBLoginDialogDelegate
