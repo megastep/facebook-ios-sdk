@@ -13,6 +13,10 @@
 
 @protocol FacebookUtilDelegate <NSObject>
 @optional
+// Notified upon login/logout 
+- (void)facebookLoggedIn:(NSString *)fullName;
+- (void)facebookLoggedOut;
+
 // Called upon successful completion of the dialogs
 - (void)publishedToFeed;
 - (void)sharedWithFriends;
@@ -43,6 +47,7 @@
 }
 
 @property (nonatomic,readonly) BOOL loggedIn;
+@property (nonatomic,readonly) NSString *fullName;
 @property (nonatomic,readonly) Facebook *facebook;
 @property (nonatomic,readonly) id<FacebookUtilDelegate> delegate;
 @property (nonatomic,copy) NSString *appName, *apiKey;
@@ -59,6 +64,7 @@
 
 - (void)forgetAccessToken;
 - (void)login:(BOOL)doAuthorize;
+- (void)logout;
 
 // Common dialogs - handle authentification automatically when needed
 
@@ -66,6 +72,7 @@
 - (void)publishToFeedWithCaption:(NSString *)caption 
                      description:(NSString *)desc
                             name:(NSString *)name
+                      properties:(NSDictionary *)props
                           appURL:(NSString *)appURL
                         imageURL:(NSString *)img;
 

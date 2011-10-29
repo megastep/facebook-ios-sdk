@@ -15,6 +15,7 @@
                    caption:(NSString *)caption 
                description:(NSString *)desc
                       name:(NSString *)name
+                properties:(NSDictionary *)props
                     appURL:(NSString *)appURL
                   imageURL:(NSString *)img
 {
@@ -24,6 +25,7 @@
         _caption = [caption copy];
         _description = [desc copy];
         _name = [name copy];
+        _properties = [props retain];
         _appURL = [appURL copy];
         _imgURL = [img copy];
     }
@@ -39,13 +41,16 @@
                            _imgURL,@"src",
                            _appURL,@"href",
 						   nil];
-	NSDictionary *attachment = [NSDictionary dictionaryWithObjectsAndKeys:
-                                _name, @"name",
-								_caption, @"caption",
-								_description, @"description",
-								[NSArray arrayWithObject:image], @"media",
-								nil
-								];
+	NSMutableDictionary *attachment = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                       _name, @"name",
+                                       _caption, @"caption",
+                                       _description, @"description",
+                                       [NSArray arrayWithObject:image], @"media",
+                                       nil
+                                       ];
+    if (_properties) {
+        [attachment setObject:_properties forKey:@"properties"];
+    }
 	NSArray *actionLinks = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:
                                                      @"<fb:intl>Get The App!</fb:intl>", @"text",
                                                      _appURL, @"href",
@@ -95,6 +100,7 @@
     [_caption release];
     [_description release];
     [_name release];
+    [_properties release];
     [_appURL release];
     [_imgURL release];
     [super dealloc];

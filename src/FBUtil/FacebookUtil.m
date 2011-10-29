@@ -12,7 +12,8 @@
 
 @implementation FacebookUtil
 
-@synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName, delegate = _delegate, apiKey = _apiKey;
+@synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName, 
+    delegate = _delegate, apiKey = _apiKey, fullName = _fullname;
 
 - (id)initWithAppID:(NSString *)appID
              apiKey:(NSString *)key
@@ -27,7 +28,16 @@
         _fetchUserInfo = fetch;
         _delegate = delegate;
 		_facebook = [[Facebook alloc] initWithAppId:appID andDelegate:self];
-        [self login:NO];
+        
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        BOOL facebook_reset = [defaults boolForKey:@"facebook_reset"];
+        if (facebook_reset) {
+            [self forgetAccessToken];
+            [defaults setBool:NO forKey:@"facebook_reset"]; // Don't do it on the next start
+            [defaults synchronize];
+        } else {
+            [self login:NO];
+        }
     }
     return self;
 }
@@ -77,6 +87,10 @@
     }
 }
 
+- (void)logout {
+    [_facebook logout:self];   
+}
+
 - (BOOL)handleOpenURL:(NSURL *)url {
     return [_facebook handleOpenURL:url];
 }
@@ -94,6 +108,7 @@
 - (void)publishToFeedWithCaption:(NSString *)caption 
                      description:(NSString *)desc
                             name:(NSString *)name
+                      properties:(NSDictionary *)props
                           appURL:(NSString *)appURL
                         imageURL:(NSString *)img
 {
@@ -102,6 +117,7 @@
                                                   caption:caption
                                               description:desc
                                                      name:name
+                                               properties:props
                                                    appURL:appURL
                                                  imageURL:img];
     [self showDialogOrAuthorize];
@@ -127,6 +143,8 @@
         [_facebook requestWithGraphPath:@"me" 
                               andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:@"name",@"fields",nil]
                             andDelegate:self];
+    } else if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)]) {
+        [_delegate facebookLoggedIn:nil];
     }
     if (_dialog) {
         [_dialog showDialog];
@@ -149,6 +167,9 @@
     _userID = 0LL;
 	_loggedIn = NO;
 	[self forgetAccessToken];
+    if ([_delegate respondsToSelector:@selector(facebookLoggedOut)]) {
+        [_delegate facebookLoggedOut];
+    }
 #ifdef DEBUG
 	NSLog(@"Facebook logged out.");
 #endif
@@ -161,7 +182,11 @@
     
     if (uid) { // Results from the "me" query
         _userID = [uid longLongValue];
+        [_fullname release];
         _fullname = [[result objectForKey:@"name"] retain];
+        if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)]) {
+            [_delegate facebookLoggedIn:_fullname];
+        }
     }
 }
 
