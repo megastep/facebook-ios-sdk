@@ -409,6 +409,7 @@ params   = _params;
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
     [_spinner stopAnimating];
     _spinner.hidden = YES;
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     
     [self updateWebOrientation];
 }
@@ -599,6 +600,8 @@ params   = _params;
 }
 
 - (void)dialogWillDisappear {
+    [_spinner stopAnimating];
+    _spinner.hidden = YES;
 }
 
 - (void)dialogDidSucceed:(NSURL *)url {
