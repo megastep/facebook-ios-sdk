@@ -20,21 +20,31 @@
 }
 
 - (void)showActualDialog {
-    NSString *friendString = [_fbFriends componentsJoinedByString:@","];
+    if ([_fbFriends count] == 0) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"No Friends", @"Alert dialog title")
+                                                        message:NSLocalizedString(@"No friends are available to share with.", @"Alert dialog message")
+                                                       delegate:nil
+                                              cancelButtonTitle:NSLocalizedString(@"Cancel", @"Alert button")
+                                              otherButtonTitles:nil];
+        [alert show];
+        [alert release];
+    } else {
+        NSString *friendString = [_fbFriends componentsJoinedByString:@","];
 #ifdef DEBUG
-    NSLog(@"Users to recommend: %@", friendString);
+        NSLog(@"Users to recommend: %@", friendString);
 #endif
-    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   _message,@"message",
-                                   NSLocalizedString(@"Check this app out!",@"Facebook request notification text"), @"notification_text",
-                                   nil];
-    if (friendString) {
-        [params setObject:friendString forKey:@"suggestions"];
+        NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                       _message,@"message",
+                                       NSLocalizedString(@"Check this app out!",@"Facebook request notification text"), @"notification_text",
+                                       nil];
+        if (friendString) {
+            [params setObject:friendString forKey:@"suggestions"];
+        }
+        
+        [_facebookUtil.facebook dialog:@"apprequests"
+                             andParams:params
+                           andDelegate:self];
     }
-    
-    [_facebookUtil.facebook dialog:@"apprequests"
-                         andParams:params
-                       andDelegate:self];
 }
 
 - (void)showDialog {
