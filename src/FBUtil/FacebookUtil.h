@@ -48,6 +48,7 @@
 
 @property (nonatomic,readonly) BOOL loggedIn;
 @property (nonatomic,readonly) NSString *fullName;
+@property (nonatomic,readonly) long long userID;
 @property (nonatomic,readonly) Facebook *facebook;
 @property (nonatomic,readonly) id<FacebookUtilDelegate> delegate;
 @property (nonatomic,copy) NSString *appName, *apiKey;
@@ -65,6 +66,8 @@
 - (void)forgetAccessToken;
 - (void)login:(BOOL)doAuthorize;
 - (void)logout;
+
+- (BOOL)isSessionValid;
 
 // Common dialogs - handle authentification automatically when needed
 

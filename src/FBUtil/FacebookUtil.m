@@ -13,7 +13,7 @@
 @implementation FacebookUtil
 
 @synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName, 
-    delegate = _delegate, apiKey = _apiKey, fullName = _fullname;
+    delegate = _delegate, apiKey = _apiKey, fullName = _fullname, userID = _userID;
 
 - (id)initWithAppID:(NSString *)appID
              apiKey:(NSString *)key
@@ -89,6 +89,10 @@
 
 - (void)logout {
     [_facebook logout:self];   
+}
+
+- (BOOL)isSessionValid {
+    return [_facebook isSessionValid];
 }
 
 - (BOOL)handleOpenURL:(NSURL *)url {
