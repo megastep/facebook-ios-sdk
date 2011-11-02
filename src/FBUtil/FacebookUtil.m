@@ -115,6 +115,7 @@
                       properties:(NSDictionary *)props
                           appURL:(NSString *)appURL
                         imageURL:(NSString *)img
+                       imageLink:(NSString *)imgURL
 {
     [_dialog release];
     _dialog = [[FBFeedPublish alloc] initWithFacebookUtil:self
@@ -123,7 +124,8 @@
                                                      name:name
                                                properties:props
                                                    appURL:appURL
-                                                 imageURL:img];
+                                                 imageURL:img
+                                                imageLink:imgURL];
     [self showDialogOrAuthorize];
 }
 

@@ -12,7 +12,7 @@
 @interface FBFeedPublish : NSObject <FacebookUtilDialog, FBDialogDelegate> {
     FacebookUtil *_facebookUtil;
     NSDictionary *_properties;
-    NSString *_caption, *_description, *_name, *_appURL, *_imgURL;
+    NSString *_caption, *_description, *_name, *_appURL, *_imgURL, *_imgLink;
 }
 
 - (id)initWithFacebookUtil:(FacebookUtil *)fb
@@ -21,6 +21,8 @@
                       name:(NSString *)name
                 properties:(NSDictionary *)props
                     appURL:(NSString *)appURL
-                  imageURL:(NSString *)img;
+                  imageURL:(NSString *)img
+                 imageLink:(NSString *)imgURL;
+
 
 @end

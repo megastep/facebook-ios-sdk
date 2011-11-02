@@ -77,7 +77,8 @@
                             name:(NSString *)name
                       properties:(NSDictionary *)props
                           appURL:(NSString *)appURL
-                        imageURL:(NSString *)img;
+                        imageURL:(NSString *)img
+                       imageLink:(NSString *)imgURL;
 
 // Share the app with the Facebook friends of the logged in user (app request)
 - (void)shareAppWithFriends:(NSString *)message;

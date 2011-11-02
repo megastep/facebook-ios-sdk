@@ -18,6 +18,7 @@
                 properties:(NSDictionary *)props
                     appURL:(NSString *)appURL
                   imageURL:(NSString *)img
+                 imageLink:(NSString *)imgURL
 {
     self = [super init];
     if (self) {
@@ -28,6 +29,7 @@
         _properties = [props retain];
         _appURL = [appURL copy];
         _imgURL = [img copy];
+        _imgLink = [imgURL copy];
     }
     return self;
 }
@@ -39,7 +41,7 @@
 	NSDictionary *image = [NSDictionary dictionaryWithObjectsAndKeys:
                            @"image",@"type",
                            _imgURL,@"src",
-                           _appURL,@"href",
+                           _imgLink ? _imgLink : _appURL,@"href",
 						   nil];
 	NSMutableDictionary *attachment = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                        _name, @"name",
@@ -103,6 +105,7 @@
     [_properties release];
     [_appURL release];
     [_imgURL release];
+    [_imgLink release];
     [super dealloc];
 }
 
