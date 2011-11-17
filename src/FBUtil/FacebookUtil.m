@@ -136,6 +136,16 @@
     [self showDialogOrAuthorize];
 }
 
+#pragma mark - Non-interactive utility methods
+
+- (void)publishScore:(NSUInteger)score {
+    if (_loggedIn) {
+        [_facebook requestWithGraphPath:@"/me/scores"
+                              andParams:[NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInteger:score] forKey:@"score"]
+                          andHttpMethod:@"POST"
+                            andDelegate:nil];
+    }
+}
 
 #pragma mark - FBSession delegate methods
 

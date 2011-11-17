@@ -83,4 +83,7 @@
 // Share the app with the Facebook friends of the logged in user (app request)
 - (void)shareAppWithFriends:(NSString *)message;
 
+// Publish a game score action (need publish_action permission)
+- (void)publishScore:(NSUInteger)score;
+
 @end
