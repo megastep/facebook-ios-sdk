@@ -162,6 +162,8 @@
     } else if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)]) {
         [_delegate facebookLoggedIn:nil];
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedInNotification
+                                                        object:self];
     if (_dialog) {
         [_dialog showDialog];
     }
@@ -171,9 +173,13 @@
 }
 
 - (void)fbDidNotLogin:(BOOL)cancelled {
-    // TODO?
+    // Make sure we are really not logged in
+    [_fullname release];
+    _fullname = nil;
+    _userID = 0LL;
+	_loggedIn = NO;
 #ifdef DEBUG
-    NSLog(@"FB did not login. Cancel = %d", cancelled);
+    NSLog(@"FB did not login. Cancelled = %d", cancelled);
 #endif
 }
 
@@ -186,6 +192,8 @@
     if ([_delegate respondsToSelector:@selector(facebookLoggedOut)]) {
         [_delegate facebookLoggedOut];
     }
+    [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedOutNotification
+                                                        object:self];
 #ifdef DEBUG
 	NSLog(@"Facebook logged out.");
 #endif

@@ -32,6 +32,10 @@
 - (void)showDialog;
 @end
 
+///// Notifications that get posted for FB status changes (alternative to delegate methods)
+#define kFBUtilLoggedInNotification     @"FacebookUtilLoggedInNotification"
+#define kFBUtilLoggedOutNotification    @"FacebookUtilLoggedOutNotification"
+
 @interface FacebookUtil : NSObject 
         <FBSessionDelegate, FBRequestDelegate>
 {

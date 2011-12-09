@@ -16,6 +16,7 @@
 
 #import "FBLoginButton.h"
 #import "Facebook.h"
+#import "FacebookUtil.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,6 +85,15 @@
 	[self addTarget:self action:@selector(touchUpInside)
 		forControlEvents:UIControlEventTouchUpInside];
 
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(fbUtilLoggedIn:)
+                                                 name:kFBUtilLoggedInNotification
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(fbUtilLoggedOut:)
+                                                 name:kFBUtilLoggedOutNotification
+                                               object:nil];
+    
 	[self updateImage];
 }
 
@@ -105,6 +115,7 @@
 }
 
 - (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 	[_imageView release];
 	[super dealloc];
 }
@@ -154,21 +165,32 @@
  * Called when the user successfully logged in.
  */
 - (void)fbDidLogin {
-	_isLoggedIn = YES;
+	self.isLoggedIn = YES;
 }
 
 /**
  * Called when the user dismissed the dialog without logging in.
  */
 - (void)fbDidNotLogin:(BOOL)cancelled {
-	_isLoggedIn = NO;
+	self.isLoggedIn = NO;
 }
 
 /**
  * Called when the user logged out.
  */
 - (void)fbDidLogout {
-	_isLoggedIn = NO;
+	self.isLoggedIn = NO;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Alternative: handle notifications from FBUtil
+
+-(void)fbUtilLoggedIn:(NSNotification *)notif {
+    self.isLoggedIn = YES;
+}
+
+-(void)fbUtilLoggedOut:(NSNotification *)notif {
+    self.isLoggedIn = NO;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
