@@ -88,7 +88,7 @@
 }
 
 - (void)logout {
-    [_facebook logout:self];   
+    [_facebook logout];   
 }
 
 - (BOOL)isSessionValid {
