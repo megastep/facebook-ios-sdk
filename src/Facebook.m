@@ -29,7 +29,7 @@ static NSString* kLogin = @"oauth";
 static NSString* kSDK = @"ios";
 static NSString* kSDKVersion = @"2";
 
-static NSString *requestFinishedKeyPath = @"finished";
+static NSString *requestFinishedKeyPath = @"state";
 static void *finishedContext = @"finishedContext";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -121,6 +121,19 @@ static void *finishedContext = @"finishedContext";
   [super dealloc];
 }
 
+- (void)invalidateSession {
+  self.accessToken = nil;
+  self.expirationDate = nil;
+    
+  NSHTTPCookieStorage* cookies = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+  NSArray* facebookCookies = [cookies cookiesForURL:
+                                [NSURL URLWithString:@"http://login.facebook.com"]];
+    
+  for (NSHTTPCookie* cookie in facebookCookies) {
+    [cookies deleteCookie:cookie];
+  }
+}
+
 /**
  * A private helper function for sending HTTP requests.
  *
@@ -160,6 +173,12 @@ static void *finishedContext = @"finishedContext";
   if (context == finishedContext) {
     FBRequest* _request = (FBRequest*)object;
     FBRequestState requestState = [_request state];
+    if (requestState == kFBRequestStateError) {
+      [self invalidateSession];
+      if ([self.sessionDelegate respondsToSelector:@selector(fbSessionInvalidated)]) {
+        [self.sessionDelegate fbSessionInvalidated];
+      }
+    }
     if (requestState == kFBRequestStateComplete || requestState == kFBRequestStateError) {
       [_request removeObserver:self forKeyPath:requestFinishedKeyPath];
       [_requests removeObject:_request];
@@ -387,22 +406,11 @@ static void *finishedContext = @"finishedContext";
  * settings screen on facebook.com.
  */
 - (void)logout {
-    [_accessToken release];
-    _accessToken = nil;
-    [_expirationDate release];
-    _expirationDate = nil;
+  [self invalidateSession];
     
-    NSHTTPCookieStorage* cookies = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-    NSArray* facebookCookies = [cookies cookiesForURL:
-                                [NSURL URLWithString:@"http://login.facebook.com"]];
-    
-    for (NSHTTPCookie* cookie in facebookCookies) {
-        [cookies deleteCookie:cookie];
-    }
-    
-    if ([self.sessionDelegate respondsToSelector:@selector(fbDidLogout)]) {
-        [self.sessionDelegate fbDidLogout];
-    }
+  if ([self.sessionDelegate respondsToSelector:@selector(fbDidLogout)]) {
+    [self.sessionDelegate fbDidLogout];
+  }
 }
 
 /**
