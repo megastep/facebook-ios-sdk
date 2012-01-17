@@ -139,9 +139,9 @@
 #pragma mark - Non-interactive utility methods
 
 - (void)publishScore:(NSUInteger)score {
-    if (_loggedIn) {
+    if (_loggedIn && score>0) {
         [_facebook requestWithGraphPath:@"/me/scores"
-                              andParams:[NSMutableDictionary dictionaryWithObject:[NSNumber numberWithInteger:score] forKey:@"score"]
+                              andParams:[NSMutableDictionary dictionaryWithObject:[[NSNumber numberWithInteger:score] stringValue] forKey:@"score"]
                           andHttpMethod:@"POST"
                             andDelegate:nil];
     }
