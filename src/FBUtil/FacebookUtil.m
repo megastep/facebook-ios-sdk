@@ -199,6 +199,15 @@
 #endif
 }
 
+- (void)fbDidExtendToken:(NSString*)accessToken
+               expiresAt:(NSDate*)expiresAt
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setObject:accessToken forKey:@"FBAccessToken"];
+	[defaults setObject:expiresAt forKey:@"FBExpDate"];
+    [defaults synchronize];
+}
+
 #pragma mark - FBRequest delegate methods
 
 - (void)request:(FBRequest *)request didLoad:(id)result {
