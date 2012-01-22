@@ -182,6 +182,15 @@
 	self.isLoggedIn = NO;
 }
 
+- (void)fbDidExtendToken:(NSString*)accessToken
+               expiresAt:(NSDate*)expiresAt {
+    // Probably don't need to do anything right here (FBUtil handles it)
+}
+
+- (void)fbSessionInvalidated {
+    self.isLoggedIn = NO;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Alternative: handle notifications from FBUtil
 

@@ -85,6 +85,7 @@
                               andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:@"name",@"fields",nil]
                             andDelegate:self];
     }
+    [_facebook extendAccessTokenIfNeeded];
 }
 
 - (void)logout {
@@ -206,6 +207,11 @@
     [defaults setObject:accessToken forKey:@"FBAccessToken"];
 	[defaults setObject:expiresAt forKey:@"FBExpDate"];
     [defaults synchronize];
+}
+
+- (void)fbSessionInvalidated
+{
+    [self fbDidLogout];
 }
 
 #pragma mark - FBRequest delegate methods
