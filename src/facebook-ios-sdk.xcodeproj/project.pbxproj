@@ -22,6 +22,7 @@
 		EAB3A529145B6901003DA3B2 /* FBFeedPublish.m in Sources */ = {isa = PBXBuildFile; fileRef = EAB3A523145B6901003DA3B2 /* FBFeedPublish.m */; };
 		EAB3A52B145B6901003DA3B2 /* FBShareApp.m in Sources */ = {isa = PBXBuildFile; fileRef = EAB3A525145B6901003DA3B2 /* FBShareApp.m */; };
 		EAC9426A1299266200D09E2B /* FBLoginButton.m in Sources */ = {isa = PBXBuildFile; fileRef = EAC942681299266200D09E2B /* FBLoginButton.m */; };
+		EAE6E54914F9864300EF3504 /* FBFrictionlessRequestSettings.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE6E54814F9864300EF3504 /* FBFrictionlessRequestSettings.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,8 @@
 		EAB3A525145B6901003DA3B2 /* FBShareApp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBShareApp.m; sourceTree = "<group>"; };
 		EAC942671299266200D09E2B /* FBLoginButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBLoginButton.h; sourceTree = "<group>"; };
 		EAC942681299266200D09E2B /* FBLoginButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBLoginButton.m; sourceTree = "<group>"; };
+		EAE6E54714F9864300EF3504 /* FBFrictionlessRequestSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBFrictionlessRequestSettings.h; sourceTree = "<group>"; };
+		EAE6E54814F9864300EF3504 /* FBFrictionlessRequestSettings.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBFrictionlessRequestSettings.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +112,8 @@
 				AEA93B0111D5293B000A4545 /* FBConnect.h */,
 				AEA93B0211D5293B000A4545 /* FBRequest.h */,
 				AEA93B0311D5293B000A4545 /* FBRequest.m */,
+				EAE6E54714F9864300EF3504 /* FBFrictionlessRequestSettings.h */,
+				EAE6E54814F9864300EF3504 /* FBFrictionlessRequestSettings.m */,
 				AEA93B0411D5293B000A4545 /* Facebook.m */,
 				AEA93B0511D5293B000A4545 /* Facebook.h */,
 				AEA93B0611D5293B000A4545 /* FBLoginDialog.h */,
@@ -229,6 +234,7 @@
 				EAB3A527145B6901003DA3B2 /* FacebookUtil.m in Sources */,
 				EAB3A529145B6901003DA3B2 /* FBFeedPublish.m in Sources */,
 				EAB3A52B145B6901003DA3B2 /* FBShareApp.m in Sources */,
+				EAE6E54914F9864300EF3504 /* FBFrictionlessRequestSettings.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,7 +300,7 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				OTHER_LDFLAGS = "-ObjC";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -310,7 +316,7 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.0;
 				OTHER_LDFLAGS = "-ObjC";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
