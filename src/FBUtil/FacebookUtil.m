@@ -86,6 +86,7 @@
                             andDelegate:self];
     }
     [_facebook extendAccessTokenIfNeeded];
+    [_facebook enableFrictionlessRequests];
 }
 
 - (void)logout {
