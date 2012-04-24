@@ -38,35 +38,27 @@
     SBJSON *jsonWriter = [[SBJSON new] autorelease];
 	//jsonWriter.humanReadable = YES;
     
-	NSDictionary *image = [NSDictionary dictionaryWithObjectsAndKeys:
-                           @"image",@"type",
-                           _imgURL,@"src",
-                           _imgLink ? _imgLink : _appURL,@"href",
-						   nil];
-	NSMutableDictionary *attachment = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                       _name, @"name",
-                                       _caption, @"caption",
-                                       _description, @"description",
-                                       [NSArray arrayWithObject:image], @"media",
-                                       nil
-                                       ];
-    if (_properties) {
-        [attachment setObject:_properties forKey:@"properties"];
-    }
+    //  Send a post to the feed for the user with the Graph API
 	NSArray *actionLinks = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                     @"<fb:intl>Get The App!</fb:intl>", @"text",
-                                                     _appURL, @"href",
+                                                     @"<fb:intl>Get The App!</fb:intl>", @"name",
+                                                     _appURL, @"link",
                                                      nil
                                                      ]];
 	NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-								   _facebookUtil.apiKey, @"api_key",
-								   NSLocalizedString(@"Care to comment?", @"Facebook user message prompt"), @"user_message_prompt",
-								   [jsonWriter stringWithObject:actionLinks], @"action_links",
-								   [jsonWriter stringWithObject:attachment], @"attachment",
+								   NSLocalizedString(@"Care to comment?", @"Facebook user message prompt"), @"message",
+								   [jsonWriter stringWithObject:actionLinks], @"actions",
+								   _imgURL, @"picture",
+                                   _name, @"name",
+                                   _caption, @"caption",
+                                   _description, @"description",
+                                   _imgLink ? _imgLink : _appURL, @"link",
 								   nil];
-	
+    if (_properties) { // Does this even work anymore?
+        [params setObject:[jsonWriter stringWithObject:_properties] forKey:@"properties"];
+    }
+
 	//NSLog(@"Story params: %@", [jsonWriter stringWithObject:params]);
-	[_facebookUtil.facebook dialog:@"stream.publish"
+	[_facebookUtil.facebook dialog:@"feed"
                          andParams:params
                        andDelegate:self];
 

@@ -40,7 +40,6 @@
         <FBSessionDelegate, FBRequestDelegate>
 {
     Facebook *_facebook;
-    NSString *_apiKey;
     NSArray *_permissions;
     NSString *_fullname;
     NSString *_appName;
@@ -55,12 +54,11 @@
 @property (nonatomic,readonly) long long userID;
 @property (nonatomic,readonly) Facebook *facebook;
 @property (nonatomic,readonly) id<FacebookUtilDelegate> delegate;
-@property (nonatomic,copy) NSString *appName, *apiKey;
+@property (nonatomic,copy) NSString *appName;
 
 + (BOOL)openPage:(unsigned long long)uid;
 
 - (id)initWithAppID:(NSString *)appID 
-             apiKey:(NSString *)key
         permissions:(NSArray *)perms
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate;
@@ -86,8 +84,5 @@
 
 // Share the app with the Facebook friends of the logged in user (app request)
 - (void)shareAppWithFriends:(NSString *)message;
-
-// Publish a game score action (need publish_action permission)
-- (void)publishScore:(NSUInteger)score;
 
 @end

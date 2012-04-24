@@ -13,10 +13,9 @@
 @implementation FacebookUtil
 
 @synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName, 
-    delegate = _delegate, apiKey = _apiKey, fullName = _fullname, userID = _userID;
+    delegate = _delegate, fullName = _fullname, userID = _userID;
 
 - (id)initWithAppID:(NSString *)appID
-             apiKey:(NSString *)key
         permissions:(NSArray *)perms 
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate
@@ -24,7 +23,6 @@
     self = [super init];
     if (self) {
         _permissions = [perms retain];
-        _apiKey = [key copy];
         _fetchUserInfo = fetch;
         _delegate = delegate;
 		_facebook = [[Facebook alloc] initWithAppId:appID andDelegate:self];
@@ -44,7 +42,6 @@
 
 - (void)dealloc {
     [_permissions release];
-    [_apiKey release];
     [_fullname release];
     [_facebook release];
     [_dialog release];
@@ -136,17 +133,6 @@
     [_dialog release];
     _dialog = [[FBShareApp alloc] initWithFacebookUtil:self message:message];
     [self showDialogOrAuthorize];
-}
-
-#pragma mark - Non-interactive utility methods
-
-- (void)publishScore:(NSUInteger)score {
-    if (_loggedIn && score>0) {
-        [_facebook requestWithGraphPath:@"/me/scores"
-                              andParams:[NSMutableDictionary dictionaryWithObject:[[NSNumber numberWithInteger:score] stringValue] forKey:@"score"]
-                          andHttpMethod:@"POST"
-                            andDelegate:nil];
-    }
 }
 
 #pragma mark - FBSession delegate methods
