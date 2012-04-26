@@ -137,7 +137,7 @@
 
 #pragma mark - FBSession delegate methods
 
-- (void)fbDidLogin {
+- (void)fbDidLogin:(BOOL)fromDialog {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	[defaults setObject:_facebook.accessToken forKey:@"FBAccessToken"];
 	[defaults setObject:_facebook.expirationDate forKey:@"FBExpDate"];
@@ -152,6 +152,10 @@
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedInNotification
                                                         object:self];
+    
+    if (fromDialog && [_delegate respondsToSelector:@selector(facebookAuthenticated)]) {
+        [_delegate facebookAuthenticated];
+    }
     if (_dialog) {
         [_dialog showDialog];
     }

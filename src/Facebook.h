@@ -117,8 +117,9 @@
 
 /**
  * Called when the user successfully logged in.
+ * If the login was the result of a dialog (on first login), then fromDialog is YES.
  */
-- (void)fbDidLogin;
+- (void)fbDidLogin:(BOOL)fromDialog;
 
 /**
  * Called when the user dismissed the dialog without logging in.

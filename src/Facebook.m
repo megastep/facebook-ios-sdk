@@ -784,8 +784,8 @@ static void *finishedContext = @"finishedContext";
     [_lastAccessTokenUpdate release];
     _lastAccessTokenUpdate = [[NSDate date] retain];
     [self reloadFrictionlessRecipientCache];
-    if ([self.sessionDelegate respondsToSelector:@selector(fbDidLogin)]) {
-        [self.sessionDelegate fbDidLogin];
+    if ([self.sessionDelegate respondsToSelector:@selector(fbDidLogin:)]) {
+        [self.sessionDelegate fbDidLogin:YES];
     }
     
 }

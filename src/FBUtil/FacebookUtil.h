@@ -17,6 +17,9 @@
 - (void)facebookLoggedIn:(NSString *)fullName;
 - (void)facebookLoggedOut;
 
+// Called upon completion of first authentication through dialog or app
+- (void)facebookAuthenticated;
+
 // Called upon successful completion of the dialogs
 - (void)publishedToFeed;
 - (void)sharedWithFriends;

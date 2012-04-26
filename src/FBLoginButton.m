@@ -164,7 +164,7 @@
 /**
  * Called when the user successfully logged in.
  */
-- (void)fbDidLogin {
+- (void)fbDidLogin:(BOOL)fromDialog {
 	self.isLoggedIn = YES;
 }
 
