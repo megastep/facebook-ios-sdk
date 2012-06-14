@@ -54,7 +54,7 @@
         }
         // Fetch the list of friends who are not using the app and present the dialog
         NSString *q = @"{\"users\":\"SELECT uid FROM user WHERE is_app_user=1 AND uid IN (SELECT uid2 FROM friend WHERE uid1=me())\","
-                        "\"all\":\"SELECT uid2 FROM friend WHERE uid1=me()\"}";
+                        "\"all\":\"SELECT uid,devices FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1=me())\"}";
         [_facebookUtil.facebook requestWithGraphPath:[NSString stringWithFormat:@"fql?q=%@",[q stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]
                                          andDelegate:self];
     } else {
@@ -72,14 +72,14 @@
 - (void)request:(FBRequest *)request didLoad:(id)result
 {
 #ifdef DEBUG
-//    NSLog(@"FBShareApp received FB result: %@", result);
+    //NSLog(@"FBShareApp received FB result: %@", result);
 #endif
     // Parse results and create list of friends who are not using the app
     NSArray *data = [result objectForKey:@"data"];
     NSAssert([data count] == 2, @"Incorrect number of data returned: %d", [data count]);
     
     NSMutableSet *users = nil;
-    NSDictionary *all = nil;
+    NSMutableSet *all = nil;
     
     for(NSDictionary *resultSet in data) {
         NSString *name = [resultSet objectForKey:@"name"];
@@ -90,22 +90,32 @@
                 [users addObject:[user objectForKey:@"uid"]];
             }
         } else if ([name isEqualToString:@"all"]) {
-            all = result;
+            // Filter out friends who don't have an iOS device
+            all = [NSMutableSet setWithCapacity:[result count]];
+            for(NSDictionary *user in result) {
+                NSArray *devices = [user objectForKey:@"devices"];
+                for (NSDictionary *device in devices) {
+                    NSString *os = [device objectForKey:@"os"];
+                    if ([os isEqualToString:@"iOS"]) {
+                        [all addObject:[user objectForKey:@"uid"]];
+                        break;
+                    }
+                }
+            }
         }
     }
     
     [_fbFriends release];
     _fbFriends = [[NSMutableArray alloc] initWithCapacity:[all count] - [users count]];
     
-    if ([users count] == 0) {
-        for(NSDictionary *user in all) {
-            [_fbFriends addObject:[user objectForKey:@"uid2"]];
-        }        
-    } else {
-        for(NSDictionary *user in all) {
-            NSNumber *uid = [user objectForKey:@"uid2"];
-            if (![users containsObject:uid]) {
-                [_fbFriends addObject:uid];                
+    if ([users count] == 0) { // No existing users - just include everybody
+        for(NSNumber *user in all) {
+            [_fbFriends addObject:user];
+        }
+    } else { // Exclude existing users
+        for(NSNumber *user in all) {
+            if (![users containsObject:user]) {
+                [_fbFriends addObject:user];                
             }
         }
     }
