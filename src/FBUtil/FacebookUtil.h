@@ -47,7 +47,7 @@
     NSString *_fullname;
     NSString *_appName;
     long long _userID;
-    BOOL _loggedIn, _fetchUserInfo;
+    BOOL _loggedIn, _fetchUserInfo, _fromDialog;
     id<FacebookUtilDelegate> _delegate;
     id<FacebookUtilDialog> _dialog;
 }

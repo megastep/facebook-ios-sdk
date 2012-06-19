@@ -142,20 +142,23 @@
 	[defaults setObject:_facebook.accessToken forKey:@"FBAccessToken"];
 	[defaults setObject:_facebook.expirationDate forKey:@"FBExpDate"];
 	_loggedIn = YES;
+    _fromDialog = fromDialog;
     [defaults synchronize];
     if (_fetchUserInfo) {
         [_facebook requestWithGraphPath:@"me" 
                               andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:@"name",@"fields",nil]
                             andDelegate:self];
-    } else if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)]) {
-        [_delegate facebookLoggedIn:nil];
+        // Notification is posted after we get the info
+    } else {
+        if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)])
+            [_delegate facebookLoggedIn:nil];
+        if (_fromDialog && [_delegate respondsToSelector:@selector(facebookAuthenticated)]) {
+            [_delegate facebookAuthenticated];
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedInNotification
+                                                            object:self];
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedInNotification
-                                                        object:self];
     
-    if (fromDialog && [_delegate respondsToSelector:@selector(facebookAuthenticated)]) {
-        [_delegate facebookAuthenticated];
-    }
     if (_dialog) {
         [_dialog showDialog];
     }
@@ -217,6 +220,11 @@
         if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)]) {
             [_delegate facebookLoggedIn:_fullname];
         }
+        if (_fromDialog && [_delegate respondsToSelector:@selector(facebookAuthenticated)]) {
+            [_delegate facebookAuthenticated];
+        }
+        [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedInNotification
+                                                            object:self];
     }
 }
 
