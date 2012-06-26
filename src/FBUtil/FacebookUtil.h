@@ -39,18 +39,7 @@
 #define kFBUtilLoggedInNotification     @"FacebookUtilLoggedInNotification"
 #define kFBUtilLoggedOutNotification    @"FacebookUtilLoggedOutNotification"
 
-@interface FacebookUtil : NSObject 
-        <FBSessionDelegate, FBRequestDelegate>
-{
-    Facebook *_facebook;
-    NSArray *_permissions;
-    NSString *_fullname;
-    NSString *_appName;
-    long long _userID;
-    BOOL _loggedIn, _fetchUserInfo, _fromDialog;
-    id<FacebookUtilDelegate> _delegate;
-    id<FacebookUtilDialog> _dialog;
-}
+@interface FacebookUtil : NSObject <FBSessionDelegate, FBRequestDelegate>
 
 @property (nonatomic,readonly) BOOL loggedIn;
 @property (nonatomic,readonly) NSString *fullName;
@@ -63,6 +52,7 @@
 
 - (id)initWithAppID:(NSString *)appID 
         permissions:(NSArray *)perms
+       appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate;
 
@@ -73,6 +63,9 @@
 - (void)logout;
 
 - (BOOL)isSessionValid;
+
+// Open Graph actions
+- (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url;
 
 // Common dialogs - handle authentification automatically when needed
 

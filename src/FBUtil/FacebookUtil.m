@@ -11,12 +11,18 @@
 #import "FBFeedPublish.h"
 
 @implementation FacebookUtil
-
+{
+    NSArray *_permissions;
+    BOOL _loggedIn, _fetchUserInfo, _fromDialog;
+    NSString *_namespace;
+    id<FacebookUtilDialog> _dialog;
+}
 @synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName, 
     delegate = _delegate, fullName = _fullname, userID = _userID;
 
 - (id)initWithAppID:(NSString *)appID
-        permissions:(NSArray *)perms 
+        permissions:(NSArray *)perms
+       appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate
 {
@@ -24,6 +30,7 @@
     if (self) {
         _permissions = [perms retain];
         _fetchUserInfo = fetch;
+        _namespace = [ns copy];
         _delegate = delegate;
 		_facebook = [[Facebook alloc] initWithAppId:appID andDelegate:self];
         
@@ -45,6 +52,7 @@
     [_fullname release];
     [_facebook release];
     [_dialog release];
+    [_namespace release];
     [super dealloc];
 }
 
@@ -133,6 +141,12 @@
     [_dialog release];
     _dialog = [[FBShareApp alloc] initWithFacebookUtil:self message:message];
     [self showDialogOrAuthorize];
+}
+
+- (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url {
+    [_facebook requestWithGraphPath:[NSString stringWithFormat:@"me/%@:%@",_namespace,action]
+                          andParams:[NSMutableDictionary dictionaryWithObject:url forKey:object]
+                        andDelegate:nil];
 }
 
 #pragma mark - FBSession delegate methods
