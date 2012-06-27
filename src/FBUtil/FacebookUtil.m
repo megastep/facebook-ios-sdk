@@ -146,7 +146,7 @@
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url {
     [_facebook requestWithGraphPath:[NSString stringWithFormat:@"me/%@:%@",_namespace,action]
                           andParams:[NSMutableDictionary dictionaryWithObject:url forKey:object]
-                        andDelegate:nil];
+                        andDelegate:self];
 }
 
 #pragma mark - FBSession delegate methods
@@ -241,5 +241,10 @@
                                                             object:self];
     }
 }
+
+- (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
+    NSLog(@"FB Request failed: %@ with error: %@", request, error);
+}
+
 
 @end
