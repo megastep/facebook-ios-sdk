@@ -146,6 +146,7 @@
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url {
     [_facebook requestWithGraphPath:[NSString stringWithFormat:@"me/%@:%@",_namespace,action]
                           andParams:[NSMutableDictionary dictionaryWithObject:url forKey:object]
+                      andHttpMethod:@"POST"
                         andDelegate:self];
 }
 
