@@ -41,7 +41,7 @@
 
 @interface FacebookUtil : NSObject <FBSessionDelegate, FBRequestDelegate>
 
-@property (nonatomic,readonly) BOOL loggedIn;
+@property (nonatomic,readonly) BOOL loggedIn, publishTimeline;
 @property (nonatomic,readonly) NSString *fullName;
 @property (nonatomic,readonly) long long userID;
 @property (nonatomic,readonly) Facebook *facebook;

@@ -17,8 +17,15 @@
     NSString *_namespace;
     id<FacebookUtilDialog> _dialog;
 }
-@synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName, 
+@synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName,
     delegate = _delegate, fullName = _fullname, userID = _userID;
+
++ (void)initialize {
+	if (self == [FacebookUtil class]) {
+        [[NSUserDefaults standardUserDefaults] registerDefaults:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES]
+                                                                                            forKey:@"facebook_timeline"]];
+    }
+}
 
 - (id)initWithAppID:(NSString *)appID
         permissions:(NSArray *)perms
@@ -35,6 +42,7 @@
 		_facebook = [[Facebook alloc] initWithAppId:appID andDelegate:self];
         
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        
         BOOL facebook_reset = [defaults boolForKey:@"facebook_reset"];
         if (facebook_reset) {
             [self forgetAccessToken];
@@ -54,6 +62,10 @@
     [_dialog release];
     [_namespace release];
     [super dealloc];
+}
+
+- (BOOL) publishTimeline {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:@"facebook_timeline"];
 }
 
 /**
@@ -144,10 +156,12 @@
 }
 
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url {
-    [_facebook requestWithGraphPath:[NSString stringWithFormat:@"me/%@:%@",_namespace,action]
-                          andParams:[NSMutableDictionary dictionaryWithObject:url forKey:object]
-                      andHttpMethod:@"POST"
-                        andDelegate:self];
+    if (self.publishTimeline) {
+        [_facebook requestWithGraphPath:[NSString stringWithFormat:@"me/%@:%@",_namespace,action]
+                              andParams:[NSMutableDictionary dictionaryWithObject:url forKey:object]
+                          andHttpMethod:@"POST"
+                            andDelegate:self];
+    }
 }
 
 #pragma mark - FBSession delegate methods
