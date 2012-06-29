@@ -164,6 +164,15 @@
     }
 }
 
+- (void)publishLike:(NSString *)url {
+    if (self.publishTimeline) {
+        [_facebook requestWithGraphPath:@"me/og.likes"
+                              andParams:[NSMutableDictionary dictionaryWithObject:url forKey:@"object"]
+                          andHttpMethod:@"POST"
+                            andDelegate:self];
+    }
+}
+
 #pragma mark - FBSession delegate methods
 
 - (void)fbDidLogin:(BOOL)fromDialog {

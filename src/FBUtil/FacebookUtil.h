@@ -66,6 +66,7 @@
 
 // Open Graph actions
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url;
+- (void)publishLike:(NSString *)url;
 
 // Common dialogs - handle authentification automatically when needed
 
