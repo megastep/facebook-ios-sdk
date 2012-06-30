@@ -101,6 +101,8 @@
         [_facebook requestWithGraphPath:@"me" 
                               andParams:[NSMutableDictionary dictionaryWithObjectsAndKeys:@"name",@"fields",nil]
                             andDelegate:self];
+    } else {
+        _loggedIn = YES;
     }
     [_facebook extendAccessTokenIfNeeded];
     [_facebook enableFrictionlessRequests];
