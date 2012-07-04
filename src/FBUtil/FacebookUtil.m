@@ -251,12 +251,13 @@
 #pragma mark - FBRequest delegate methods
 
 - (void)request:(FBRequest *)request didLoad:(id)result {
+    id name = [result objectForKey:@"name"];
     id uid = [result objectForKey:@"id"];
     
-    if (uid) { // Results from the "me" query
+    if (name && uid) { // Results from the "me" query
         _userID = [uid longLongValue];
         [_fullname release];
-        _fullname = [[result objectForKey:@"name"] retain];
+        _fullname = [name retain];
         if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)]) {
             [_delegate facebookLoggedIn:_fullname];
         }
