@@ -56,6 +56,8 @@
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate;
 
+// Returns the target_url passed from FB if available, or nil
+- (NSString *)getTargetURL:(NSURL *)url;
 - (BOOL)handleOpenURL:(NSURL *)url;
 
 - (void)forgetAccessToken;

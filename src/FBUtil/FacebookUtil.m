@@ -10,6 +10,10 @@
 #import "FBShareApp.h"
 #import "FBFeedPublish.h"
 
+@interface FacebookUtil ()
+- (NSDictionary*)parseURLParams:(NSString *)query;
+@end
+
 @implementation FacebookUtil
 {
     NSArray *_permissions;
@@ -17,6 +21,7 @@
     NSString *_namespace;
     id<FacebookUtilDialog> _dialog;
 }
+
 @synthesize loggedIn = _loggedIn, facebook = _facebook, appName = _appName,
     delegate = _delegate, fullName = _fullname, userID = _userID;
 
@@ -114,6 +119,29 @@
 
 - (BOOL)isSessionValid {
     return [_facebook isSessionValid];
+}
+
+/**
+ * A function for parsing URL parameters.
+ */
+- (NSDictionary*)parseURLParams:(NSString *)query {
+    NSArray *pairs = [query componentsSeparatedByString:@"&"];
+    NSMutableDictionary *params = [[[NSMutableDictionary alloc] init]
+                                   autorelease];
+    for (NSString *pair in pairs) {
+        NSArray *kv = [pair componentsSeparatedByString:@"="];
+        NSString *val = [[kv objectAtIndex:1]
+                         stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        [params setObject:val forKey:[kv objectAtIndex:0]];
+    }
+    return params;
+}
+
+- (NSString *)getTargetURL:(NSURL *)url {
+    NSString *query = [url fragment];
+    NSDictionary *params = [self parseURLParams:query];
+    // Check if target URL exists
+    return [params valueForKey:@"target_url"];
 }
 
 - (BOOL)handleOpenURL:(NSURL *)url {
