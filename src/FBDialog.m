@@ -589,16 +589,6 @@ params   = _params;
     return str;
 }
 
-/**
- * Extracts the action component from the original dialog request
- */
-- (NSString *) action {
-    if (_serverURL) {
-        return [_serverURL substringToIndex:[kDialogBaseURL length]];
-    }
-    return nil;
-}
-
 - (id)initWithURL: (NSString *) serverURL
            params: (NSMutableDictionary *) params
   isViewInvisible: (BOOL)isViewInvisible
