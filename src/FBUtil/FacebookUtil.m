@@ -279,8 +279,12 @@
 #pragma mark - FBRequest delegate methods
 
 - (void)request:(FBRequest *)request didLoad:(id)result {
-    id name = [result objectForKey:@"name"];
-    id uid = [result objectForKey:@"id"];
+    id name = nil, uid = nil;
+    
+    if ([result respondsToSelector:@selector(objectForKey:)]) {
+        name = [result objectForKey:@"name"];
+        uid = [result objectForKey:@"id"];
+    }
     
     if (name && uid) { // Results from the "me" query
         _userID = [uid longLongValue];
