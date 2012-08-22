@@ -33,6 +33,7 @@
 }
 
 - (id)initWithAppID:(NSString *)appID
+       schemeSuffix:(NSString *)suffix
         permissions:(NSArray *)perms
        appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
@@ -44,7 +45,9 @@
         _fetchUserInfo = fetch;
         _namespace = [ns copy];
         _delegate = delegate;
-		_facebook = [[Facebook alloc] initWithAppId:appID andDelegate:self];
+		_facebook = [[Facebook alloc] initWithAppId:appID
+                                    urlSchemeSuffix:suffix
+                                        andDelegate:self];
         
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         

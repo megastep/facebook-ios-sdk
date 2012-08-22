@@ -51,6 +51,7 @@
 + (BOOL)openPage:(unsigned long long)uid;
 
 - (id)initWithAppID:(NSString *)appID 
+       schemeSuffix:(NSString *)suffix
         permissions:(NSArray *)perms
        appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
