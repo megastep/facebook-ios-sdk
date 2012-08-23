@@ -864,10 +864,6 @@ typedef enum FBRequestConnectionState {
                [value isKindOfClass:[NSNumber class]]) {
         // Just serialize these.
         action(key, value);
-    } else if ([value isKindOfClass:[NSDate class]]) {
-        // We have two options for serializing dates. This is the easy one.
-        value = [NSString stringWithFormat:@"%.0f", [value timeIntervalSince1970]];
-        action(key, value);
     } else if ([value isKindOfClass:[NSArray class]]) {
         // Arrays are serialized as multiple elements with keys of the
         // form key[0], key[1], etc.
