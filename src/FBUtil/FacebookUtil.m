@@ -206,6 +206,25 @@
     }
 }
 
+// Submit the URL to a registered achievement page
+- (void)publishAchievement:(NSString *)achievementURL {
+    if (self.publishTimeline) {
+        [_facebook requestWithGraphPath:@"me/achievements"
+                              andParams:[NSMutableDictionary dictionaryWithObject:achievementURL forKey:@"achievement"]
+                          andHttpMethod:@"POST"
+                            andDelegate:self];
+    }
+}
+
+- (void)publishScore:(NSUInteger)score {
+    if (self.publishTimeline) {
+        [_facebook requestWithGraphPath:@"me/scores"
+                              andParams:[NSMutableDictionary dictionaryWithObject:@(score) forKey:@"score"]
+                          andHttpMethod:@"POST"
+                            andDelegate:self];
+    }
+}
+
 #pragma mark - FBSession delegate methods
 
 - (void)fbDidLogin:(BOOL)fromDialog {
