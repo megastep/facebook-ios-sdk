@@ -219,7 +219,8 @@
 - (void)publishScore:(NSUInteger)score {
     if (self.publishTimeline) {
         [_facebook requestWithGraphPath:@"me/scores"
-                              andParams:[NSMutableDictionary dictionaryWithObject:@(score) forKey:@"score"]
+                              andParams:[NSMutableDictionary dictionaryWithObject:[NSString stringWithFormat:@"%d",score]
+                                                                           forKey:@"score"]
                           andHttpMethod:@"POST"
                             andDelegate:self];
     }
