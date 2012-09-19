@@ -325,6 +325,10 @@
 }
 
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
+    NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
+    if ([[errDict objectForKey:@"code"] integerValue] == 3501) { // Duplicate achievement error code from FB
+        return;
+    }
     NSLog(@"FB Request failed: %@ with error: %@", request, error);
 }
 
