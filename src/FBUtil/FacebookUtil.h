@@ -3,7 +3,7 @@
 //  Utility class to handle common Facebook functionality
 //
 //  Created by Stéphane Peter on 10/17/11.
-//  Copyright (c) 2011 Catloaf Software, LLC. All rights reserved.
+//  Copyright (c) 2011-2012 Catloaf Software, LLC. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
@@ -51,6 +51,7 @@
 + (BOOL)openPage:(unsigned long long)uid;
 
 - (id)initWithAppID:(NSString *)appID 
+       schemeSuffix:(NSString *)suffix
         permissions:(NSArray *)perms
        appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
@@ -69,6 +70,9 @@
 // Open Graph actions
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url;
 - (void)publishLike:(NSString *)url;
+
+- (void)publishAchievement:(NSString *)achievement;
+- (void)publishScore:(NSUInteger)score;
 
 // Common dialogs - handle authentification automatically when needed
 

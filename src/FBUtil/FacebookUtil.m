@@ -33,6 +33,7 @@
 }
 
 - (id)initWithAppID:(NSString *)appID
+       schemeSuffix:(NSString *)suffix
         permissions:(NSArray *)perms
        appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
@@ -44,7 +45,9 @@
         _fetchUserInfo = fetch;
         _namespace = [ns copy];
         _delegate = delegate;
-		_facebook = [[Facebook alloc] initWithAppId:appID andDelegate:self];
+		_facebook = [[Facebook alloc] initWithAppId:appID
+                                    urlSchemeSuffix:suffix
+                                        andDelegate:self];
         
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         
@@ -203,6 +206,26 @@
     }
 }
 
+// Submit the URL to a registered achievement page
+- (void)publishAchievement:(NSString *)achievementURL {
+    if (self.publishTimeline) {
+        [_facebook requestWithGraphPath:@"me/achievements"
+                              andParams:[NSMutableDictionary dictionaryWithObject:achievementURL forKey:@"achievement"]
+                          andHttpMethod:@"POST"
+                            andDelegate:self];
+    }
+}
+
+- (void)publishScore:(NSUInteger)score {
+    if (self.publishTimeline) {
+        [_facebook requestWithGraphPath:@"me/scores"
+                              andParams:[NSMutableDictionary dictionaryWithObject:[NSString stringWithFormat:@"%d",score]
+                                                                           forKey:@"score"]
+                          andHttpMethod:@"POST"
+                            andDelegate:self];
+    }
+}
+
 #pragma mark - FBSession delegate methods
 
 - (void)fbDidLogin:(BOOL)fromDialog {
@@ -279,8 +302,12 @@
 #pragma mark - FBRequest delegate methods
 
 - (void)request:(FBRequest *)request didLoad:(id)result {
-    id name = [result objectForKey:@"name"];
-    id uid = [result objectForKey:@"id"];
+    id name = nil, uid = nil;
+    
+    if ([result respondsToSelector:@selector(objectForKey:)]) {
+        name = [result objectForKey:@"name"];
+        uid = [result objectForKey:@"id"];
+    }
     
     if (name && uid) { // Results from the "me" query
         _userID = [uid longLongValue];
@@ -298,6 +325,10 @@
 }
 
 - (void)request:(FBRequest *)request didFailWithError:(NSError *)error {
+    NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
+    if ([[errDict objectForKey:@"code"] integerValue] == 3501) { // Duplicate achievement error code from FB
+        return;
+    }
     NSLog(@"FB Request failed: %@ with error: %@", request, error);
 }
 
