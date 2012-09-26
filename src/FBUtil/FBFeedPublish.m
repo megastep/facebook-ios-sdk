@@ -35,7 +35,7 @@
 }
 
 - (void)showDialog {
-    SBJSON *jsonWriter = [[SBJSON new] autorelease];
+    FBSBJSON *jsonWriter = [[FBSBJSON new] autorelease];
 	//jsonWriter.humanReadable = YES;
     
     //  Send a post to the feed for the user with the Graph API
