@@ -311,6 +311,7 @@
 		E7BBCE2D15753C7400B6B8F6 /* FBContentLinkTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = FBContentLinkTests.m; path = tests/FBContentLinkTests.m; sourceTree = "<group>"; };
 		E7BBCE2F15753C8E00B6B8F6 /* FBContentLink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBContentLink.h; sourceTree = "<group>"; };
 		E7BBCE3015753C8E00B6B8F6 /* FBContentLink.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FBContentLink.m; sourceTree = "<group>"; };
+		EA11F5AB162F8B1100E5321C /* FBGraphUserExtraFields.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBGraphUserExtraFields.h; sourceTree = "<group>"; };
 		EAE9054D15D1FBCA00B503A3 /* FacebookUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FacebookUtil.h; sourceTree = "<group>"; };
 		EAE9054E15D1FBCA00B503A3 /* FacebookUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FacebookUtil.m; sourceTree = "<group>"; };
 		EAE9054F15D1FBCA00B503A3 /* FBFeedPublish.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FBFeedPublish.h; sourceTree = "<group>"; };
@@ -558,6 +559,7 @@
 				EAE9055015D1FBCA00B503A3 /* FBFeedPublish.m */,
 				EAE9055115D1FBCA00B503A3 /* FBShareApp.h */,
 				EAE9055215D1FBCA00B503A3 /* FBShareApp.m */,
+				EA11F5AB162F8B1100E5321C /* FBGraphUserExtraFields.h */,
 			);
 			path = FBUtil;
 			sourceTree = "<group>";

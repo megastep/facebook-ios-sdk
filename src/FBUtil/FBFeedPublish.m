@@ -8,6 +8,7 @@
 //
 
 #import "FBFeedPublish.h"
+#import "FBSBJSON.h"
 
 @implementation FBFeedPublish
 
@@ -72,8 +73,8 @@
 #endif
 	if ([error code] == 190) {
 		// Invalid token - force login
-		[_facebookUtil forgetAccessToken];
-		[_facebookUtil login:YES];
+		[_facebookUtil logout];
+		[_facebookUtil login:YES andThen:nil];
 	} else {
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
 														message:[NSString stringWithFormat:@"%@.",[error localizedDescription]] 

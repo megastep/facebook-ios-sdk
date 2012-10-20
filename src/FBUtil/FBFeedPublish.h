@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "FacebookUtil.h"
+#import "Facebook.h"
 
 @interface FBFeedPublish : NSObject <FacebookUtilDialog, FBDialogDelegate> {
     FacebookUtil *_facebookUtil;

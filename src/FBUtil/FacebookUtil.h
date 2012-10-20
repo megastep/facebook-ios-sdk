@@ -7,9 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "FBConnect.h"
+#import "FacebookSDK.h"
 
 @class FacebookUtil;
+@class Facebook;
 
 @protocol FacebookUtilDelegate <NSObject>
 @optional
@@ -39,20 +40,20 @@
 #define kFBUtilLoggedInNotification     @"FacebookUtilLoggedInNotification"
 #define kFBUtilLoggedOutNotification    @"FacebookUtilLoggedOutNotification"
 
-@interface FacebookUtil : NSObject <FBSessionDelegate, FBRequestDelegate>
+extern NSString *const FBSessionStateChangedNotification;
+
+@interface FacebookUtil : NSObject
 
 @property (nonatomic,readonly) BOOL loggedIn, publishTimeline;
-@property (nonatomic,readonly) NSString *fullName;
-@property (nonatomic,readonly) long long userID;
-@property (nonatomic,readonly) Facebook *facebook;
+@property (nonatomic,readonly) NSString *fullName, *userID;
 @property (nonatomic,readonly) id<FacebookUtilDelegate> delegate;
+@property (nonatomic,readonly) Facebook *facebook;
 @property (nonatomic,copy) NSString *appName;
 
 + (BOOL)openPage:(unsigned long long)uid;
 
 - (id)initWithAppID:(NSString *)appID 
        schemeSuffix:(NSString *)suffix
-        permissions:(NSArray *)perms
        appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate;
@@ -61,15 +62,16 @@
 - (NSString *)getTargetURL:(NSURL *)url;
 - (BOOL)handleOpenURL:(NSURL *)url;
 
-- (void)forgetAccessToken;
-- (void)login:(BOOL)doAuthorize;
+- (BOOL)login:(BOOL)doAuthorize andThen:(void (^)(void))handler;
 - (void)logout;
 
 - (BOOL)isSessionValid;
 
+- (void)handleDidBecomeActive;
+
 // Open Graph actions
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url;
-- (void)publishLike:(NSString *)url;
+- (void)publishLike:(NSString *)url andThen:(void (^)(void))completion;
 
 - (void)publishAchievement:(NSString *)achievement;
 - (void)publishScore:(NSUInteger)score;
@@ -86,6 +88,6 @@
                        imageLink:(NSString *)imgURL;
 
 // Share the app with the Facebook friends of the logged in user (app request)
-- (void)shareAppWithFriends:(NSString *)message;
+- (void)shareAppWithFriends:(NSString *)message from:(UIViewController *)vc;
 
 @end
