@@ -10,7 +10,7 @@
 #import "FacebookUtil.h"
 #import "Facebook.h"
 
-@interface FBFeedPublish : NSObject <FacebookUtilDialog, FBDialogDelegate> {
+@interface FBFeedPublish : NSObject <FBDialogDelegate> {
     FacebookUtil *_facebookUtil;
     NSDictionary *_properties;
     NSString *_caption, *_description, *_name, *_appURL, *_imgURL, *_imgLink;
@@ -25,5 +25,6 @@
                   imageURL:(NSString *)img
                  imageLink:(NSString *)imgURL;
 
+- (void)showDialog;
 
 @end
