@@ -59,9 +59,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                        NSDictionary<FBGraphUser> *user,
                        NSError *error) {
                          if (!error) {
-                             [_fullname release];
                              _fullname = [user.name copy];
-                             [_userID release];
                              _userID = [user.id copy];
                              if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)])
                                  [_delegate facebookLoggedIn:_fullname];
@@ -92,12 +90,9 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         case FBSessionStateClosed:
         case FBSessionStateClosedLoginFailed:
             [FBSession.activeSession closeAndClearTokenInformation];
-            [_fullname release];
             _fullname = nil;
-            [_userID release];
             _userID = nil;
             _loggedIn = NO;
-            [_facebook release];
             _facebook = nil;
             if ([_delegate respondsToSelector:@selector(facebookLoggedOut)]) {
                 [_delegate facebookLoggedOut];
@@ -120,7 +115,6 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                   cancelButtonTitle:@"OK"
                                   otherButtonTitles:nil];
         [alertView show];
-        [alertView release];
     }
 }
 
@@ -150,13 +144,6 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         }
     }
     return self;
-}
-
-- (void)dealloc {
-    [_fullname release];
-    [_userID release];
-    [_namespace release];
-    [super dealloc];
 }
 
 - (BOOL) publishTimeline {
@@ -205,8 +192,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
  */
 - (NSDictionary*)parseURLParams:(NSString *)query {
     NSArray *pairs = [query componentsSeparatedByString:@"&"];
-    NSMutableDictionary *params = [[[NSMutableDictionary alloc] init]
-                                   autorelease];
+    NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
     for (NSString *pair in pairs) {
         NSArray *kv = [pair componentsSeparatedByString:@"="];
         NSString *val = [[kv objectAtIndex:1]
@@ -272,7 +258,6 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                      imageURL:img
                                                     imageLink:imgURL];
         [dialog showDialogFrom:vc];
-        [dialog autorelease];
     }];
 }
 
@@ -281,7 +266,6 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     // FIXME: Do the reauthorize here too?
     FBShareApp *dialog = [[FBShareApp alloc] initWithFacebookUtil:self message:message];
     [dialog presentFromViewController:vc];
-    [dialog autorelease];
 }
 
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url {

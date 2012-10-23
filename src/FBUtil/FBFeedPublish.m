@@ -34,7 +34,7 @@
         _description = [desc copy];
         _textDesc = [txt copy];
         _name = [name copy];
-        _properties = [props retain];
+        _properties = props;
         _appURL = [appURL copy];
         _imgURL = [img copy];
         _imgLink = [imgURL copy];
@@ -50,11 +50,20 @@
                                                                   image:(_imgPath ? [UIImage imageNamed:_imgPath] : nil)
                                                                     url:[NSURL URLWithString:_appURL]
                                                                 handler:^(FBNativeDialogResult result, NSError *error) {
+                                                                    // Only show the error if it is not due to the dialog
+                                                                    // not being supporte, i.e. code = 7, otherwise ignore
+                                                                    // because our fallback will show the share view controller.
+                                                                    if (error && [error code] == 7) {
+                                                                        return;
+                                                                    }
                                                                     
+                                                                    if (error) {
+                                                                        NSLog(@"FBNativeDialogs error: %@", error);
+                                                                    }
                                                                 }];
     
     if (!nativeSuccess) {
-        FBSBJSON *jsonWriter = [[FBSBJSON new] autorelease];
+        FBSBJSON *jsonWriter = [FBSBJSON new];
         //jsonWriter.humanReadable = YES;
         
         //  Send a post to the feed for the user with the Graph API
@@ -100,26 +109,12 @@
 											  cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
 											  otherButtonTitles:nil];
 		[alert show];
-		[alert release];
 	}
 }
 
 - (void)dialogDidComplete:(FBDialog *)dialog {
     if ([_facebookUtil.delegate respondsToSelector:@selector(publishedToFeed)])
         [_facebookUtil.delegate publishedToFeed];
-}
-
-- (void)dealloc {
-    [_caption release];
-    [_description release];
-    [_textDesc release];
-    [_name release];
-    [_properties release];
-    [_appURL release];
-    [_imgURL release];
-    [_imgLink release];
-    [_imgPath release];
-    [super dealloc];
 }
 
 @end

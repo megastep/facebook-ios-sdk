@@ -162,11 +162,11 @@
 		E7BBCE3115753C8E00B6B8F6 /* FBContentLink.h in Headers */ = {isa = PBXBuildFile; fileRef = E7BBCE2F15753C8E00B6B8F6 /* FBContentLink.h */; settings = {ATTRIBUTES = (); }; };
 		E7BBCE3315753C8E00B6B8F6 /* FBContentLink.m in Sources */ = {isa = PBXBuildFile; fileRef = E7BBCE3015753C8E00B6B8F6 /* FBContentLink.m */; };
 		EAE9055315D1FBCA00B503A3 /* FacebookUtil.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE9054D15D1FBCA00B503A3 /* FacebookUtil.h */; };
-		EAE9055415D1FBCA00B503A3 /* FacebookUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE9054E15D1FBCA00B503A3 /* FacebookUtil.m */; };
+		EAE9055415D1FBCA00B503A3 /* FacebookUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE9054E15D1FBCA00B503A3 /* FacebookUtil.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		EAE9055515D1FBCA00B503A3 /* FBFeedPublish.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE9054F15D1FBCA00B503A3 /* FBFeedPublish.h */; };
-		EAE9055615D1FBCA00B503A3 /* FBFeedPublish.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE9055015D1FBCA00B503A3 /* FBFeedPublish.m */; };
+		EAE9055615D1FBCA00B503A3 /* FBFeedPublish.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE9055015D1FBCA00B503A3 /* FBFeedPublish.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		EAE9055715D1FBCA00B503A3 /* FBShareApp.h in Headers */ = {isa = PBXBuildFile; fileRef = EAE9055115D1FBCA00B503A3 /* FBShareApp.h */; };
-		EAE9055815D1FBCA00B503A3 /* FBShareApp.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE9055215D1FBCA00B503A3 /* FBShareApp.m */; };
+		EAE9055815D1FBCA00B503A3 /* FBShareApp.m in Sources */ = {isa = PBXBuildFile; fileRef = EAE9055215D1FBCA00B503A3 /* FBShareApp.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
