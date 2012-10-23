@@ -22,6 +22,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 {
     Facebook *_facebook;
     BOOL _loggedIn, _fetchUserInfo, _fromDialog;
+    FBShareApp *_shareDialog;
     NSString *_namespace;
     void (^_afterLogin)(void);
 }
@@ -263,9 +264,8 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 
 - (void)shareAppWithFriends:(NSString *)message from:(UIViewController *)vc {
-    // FIXME: Do the reauthorize here too?
-    FBShareApp *dialog = [[FBShareApp alloc] initWithFacebookUtil:self message:message];
-    [dialog presentFromViewController:vc];
+    _shareDialog = [[FBShareApp alloc] initWithFacebookUtil:self message:message];
+    [_shareDialog presentFromViewController:vc];
 }
 
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url {
