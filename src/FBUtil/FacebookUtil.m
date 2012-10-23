@@ -251,22 +251,27 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 - (void)publishToFeedWithCaption:(NSString *)caption 
                      description:(NSString *)desc
+                 textDescription:(NSString *)text
                             name:(NSString *)name
                       properties:(NSDictionary *)props
                           appURL:(NSString *)appURL
+                       imagePath:(NSString *)imgPath
                         imageURL:(NSString *)img
                        imageLink:(NSString *)imgURL
+                            from:(UIViewController *)vc
 {
     [self doWithPermission:@"publish_actions" toDo:^{
         FBFeedPublish *dialog = [[FBFeedPublish alloc] initWithFacebookUtil:self
                                                       caption:caption
                                                   description:desc
+                                              textDescription:text
                                                          name:name
                                                    properties:props
                                                        appURL:appURL
+                                                    imagePath:imgPath
                                                      imageURL:img
                                                     imageLink:imgURL];
-        [dialog showDialog];
+        [dialog showDialogFrom:vc];
         [dialog autorelease];
     }];
 }

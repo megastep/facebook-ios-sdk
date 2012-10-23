@@ -10,14 +10,20 @@
 #import "FBFeedPublish.h"
 #import "FBSBJSON.h"
 
-@implementation FBFeedPublish
+@implementation FBFeedPublish {
+    FacebookUtil *_facebookUtil;
+    NSDictionary *_properties;
+    NSString *_caption, *_description, *_textDesc, *_name, *_appURL, *_imgURL, *_imgLink, *_imgPath;
+}
 
 - (id)initWithFacebookUtil:(FacebookUtil *)fb
                    caption:(NSString *)caption 
                description:(NSString *)desc
+           textDescription:(NSString *)txt
                       name:(NSString *)name
                 properties:(NSDictionary *)props
                     appURL:(NSString *)appURL
+                 imagePath:(NSString *)path
                   imageURL:(NSString *)img
                  imageLink:(NSString *)imgURL
 {
@@ -26,43 +32,55 @@
         _facebookUtil = fb;
         _caption = [caption copy];
         _description = [desc copy];
+        _textDesc = [txt copy];
         _name = [name copy];
         _properties = [props retain];
         _appURL = [appURL copy];
         _imgURL = [img copy];
         _imgLink = [imgURL copy];
+        _imgPath = [path copy];
     }
     return self;
 }
 
-- (void)showDialog {
-    FBSBJSON *jsonWriter = [[FBSBJSON new] autorelease];
-	//jsonWriter.humanReadable = YES;
+- (void)showDialogFrom:(UIViewController *)vc {
+    // First try to set up a native dialog
+    BOOL nativeSuccess = [FBNativeDialogs presentShareDialogModallyFrom:vc
+                                                            initialText:_textDesc
+                                                                  image:(_imgPath ? [UIImage imageNamed:_imgPath] : nil)
+                                                                    url:[NSURL URLWithString:_appURL]
+                                                                handler:^(FBNativeDialogResult result, NSError *error) {
+                                                                    
+                                                                }];
     
-    //  Send a post to the feed for the user with the Graph API
-	NSArray *actionLinks = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                     @"<fb:intl>Get The App!</fb:intl>", @"name",
-                                                     _appURL, @"link",
-                                                     nil
-                                                     ]];
-	NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-								   NSLocalizedString(@"Care to comment?", @"Facebook user message prompt"), @"message",
-								   [jsonWriter stringWithObject:actionLinks], @"actions",
-								   _imgURL, @"picture",
-                                   _name, @"name",
-                                   _caption, @"caption",
-                                   _description, @"description",
-                                   _imgLink ? _imgLink : _appURL, @"link",
-								   nil];
-    if (_properties) { // Does this even work anymore?
-        [params setObject:[jsonWriter stringWithObject:_properties] forKey:@"properties"];
+    if (!nativeSuccess) {
+        FBSBJSON *jsonWriter = [[FBSBJSON new] autorelease];
+        //jsonWriter.humanReadable = YES;
+        
+        //  Send a post to the feed for the user with the Graph API
+        NSArray *actionLinks = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:
+                                                         @"<fb:intl>Get The App!</fb:intl>", @"name",
+                                                         _appURL, @"link",
+                                                         nil
+                                                         ]];
+        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                       NSLocalizedString(@"Care to comment?", @"Facebook user message prompt"), @"message",
+                                       [jsonWriter stringWithObject:actionLinks], @"actions",
+                                       _imgURL, @"picture",
+                                       _name, @"name",
+                                       _caption, @"caption",
+                                       _description, @"description",
+                                       _imgLink ? _imgLink : _appURL, @"link",
+                                       nil];
+        if (_properties) { // Does this even work anymore?
+            [params setObject:[jsonWriter stringWithObject:_properties] forKey:@"properties"];
+        }
+        
+        //NSLog(@"Story params: %@", [jsonWriter stringWithObject:params]);
+        [_facebookUtil.facebook dialog:@"feed"
+                             andParams:params
+                           andDelegate:self];
     }
-
-	//NSLog(@"Story params: %@", [jsonWriter stringWithObject:params]);
-	[_facebookUtil.facebook dialog:@"feed"
-                         andParams:params
-                       andDelegate:self];
-
 }
 
 #pragma mark - FBDialog delegate methods
@@ -94,11 +112,13 @@
 - (void)dealloc {
     [_caption release];
     [_description release];
+    [_textDesc release];
     [_name release];
     [_properties release];
     [_appURL release];
     [_imgURL release];
     [_imgLink release];
+    [_imgPath release];
     [super dealloc];
 }
 

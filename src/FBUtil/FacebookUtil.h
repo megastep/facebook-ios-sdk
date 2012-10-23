@@ -75,12 +75,15 @@ extern NSString *const FBSessionStateChangedNotification;
 
 // Publish a story on the users's feed
 - (void)publishToFeedWithCaption:(NSString *)caption 
-                     description:(NSString *)desc
+                     description:(NSString *)desc // May include HTML
+                 textDescription:(NSString *)text
                             name:(NSString *)name
                       properties:(NSDictionary *)props
                           appURL:(NSString *)appURL
+                       imagePath:(NSString *)imgPath
                         imageURL:(NSString *)img
-                       imageLink:(NSString *)imgURL;
+                       imageLink:(NSString *)imgURL
+                            from:(UIViewController *)vc;
 
 // Share the app with the Facebook friends of the logged in user (app request)
 - (void)shareAppWithFriends:(NSString *)message from:(UIViewController *)vc;
