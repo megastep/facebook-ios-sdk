@@ -30,6 +30,7 @@
 - (void)presentFromViewController:(UIViewController *)controller {
     if (FBSession.activeSession.isOpen) {
         _friendPickerController = [[FBFriendPickerViewController alloc] init];
+        _friendPickerController.modalPresentationStyle = UIModalPresentationFormSheet;
         
         // Configure the picker ...
         _friendPickerController.title = NSLocalizedString(@"Select Friends",@"Facebook friend picker title");
