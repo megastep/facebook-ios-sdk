@@ -23,6 +23,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     Facebook *_facebook;
     BOOL _loggedIn, _fetchUserInfo, _fromDialog;
     FBShareApp *_shareDialog;
+    FBFeedPublish *_feedDialog;
     NSString *_namespace;
     void (^_afterLogin)(void);
 }
@@ -216,11 +217,18 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 - (void)doWithPermission:(NSString *)permission toDo:(void (^)(void))handler {
     if (FBSession.activeSession.isOpen) {
-        [FBSession.activeSession reauthorizeWithPublishPermissions:@[permission]
-                                                   defaultAudience:FBSessionDefaultAudienceEveryone
-                                                 completionHandler:^(FBSession *session, NSError *error) {
-                                                     handler();
-                                                 }];
+#ifdef DEBUG
+        NSLog(@"Available permissions: %@", FBSession.activeSession.permissions);
+#endif
+        if ([FBSession.activeSession.permissions containsObject:permission]) {
+            handler();
+        } else {
+            [FBSession.activeSession reauthorizeWithPublishPermissions:@[permission]
+                                                       defaultAudience:FBSessionDefaultAudienceEveryone
+                                                     completionHandler:^(FBSession *session, NSError *error) {
+                                                         handler();
+                                                     }];
+        }
     } else {
         _afterLogin = [handler copy];
         [FBSession openActiveSessionWithPublishPermissions:@[permission]
@@ -248,17 +256,17 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                             from:(UIViewController *)vc
 {
     [self doWithPermission:@"publish_actions" toDo:^{
-        FBFeedPublish *dialog = [[FBFeedPublish alloc] initWithFacebookUtil:self
-                                                      caption:caption
-                                                  description:desc
-                                              textDescription:text
-                                                         name:name
-                                                   properties:props
-                                                       appURL:appURL
-                                                    imagePath:imgPath
-                                                     imageURL:img
-                                                    imageLink:imgURL];
-        [dialog showDialogFrom:vc];
+        _feedDialog = [[FBFeedPublish alloc] initWithFacebookUtil:self
+                                                          caption:caption
+                                                      description:desc
+                                                  textDescription:text
+                                                             name:name
+                                                       properties:props
+                                                           appURL:appURL
+                                                        imagePath:imgPath
+                                                         imageURL:img
+                                                        imageLink:imgURL];
+        [_feedDialog showDialogFrom:vc];
     }];
 }
 
