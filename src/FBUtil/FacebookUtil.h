@@ -66,7 +66,8 @@ extern NSString *const FBSessionStateChangedNotification;
 
 // Open Graph actions
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url;
-- (void)publishLike:(NSString *)url andThen:(void (^)(void))completion;
+- (void)publishLike:(NSString *)url andThen:(void (^)(NSString *likeID))completion;
+- (void)publishUnlike:(NSString *)likeID;
 
 - (void)publishAchievement:(NSString *)achievement;
 - (void)publishScore:(NSUInteger)score;

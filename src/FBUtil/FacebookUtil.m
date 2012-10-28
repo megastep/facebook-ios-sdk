@@ -291,10 +291,10 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     }];
 }
 
-- (void)publishLike:(NSString *)url andThen:(void (^)(void))completion {
+- (void)publishLike:(NSString *)url andThen:(void (^)(NSString *likeID))completion {
     if (!self.publishTimeline) {
         if (completion)
-            completion();
+            completion(nil);
         return;
     }
     [self doWithPermission:@"publish_actions" toDo:^{
@@ -303,10 +303,29 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                               HTTPMethod:@"POST"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
-                NSLog(@"Error publishing like: %@", error);
+                NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
+                if ([[errDict objectForKey:@"code"] integerValue] != 3501) { // Duplicate error code from FB
+                    NSLog(@"Error publishing like: %@", error);
+                }
             }
-            if (completion)
-                completion();
+            if (completion) {
+                completion([result objectForKey:@"id"]);
+            }
+        }];
+    }];
+}
+
+- (void)publishUnlike:(NSString *)likeID {
+    if (!self.publishTimeline)
+        return;
+    [self doWithPermission:@"publish_actions" toDo:^{
+        FBRequest *req = [FBRequest requestWithGraphPath:likeID
+                                              parameters:nil
+                                              HTTPMethod:@"DELETE"];
+        [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+            if (error) {
+                NSLog(@"Error deleting like: %@", error);
+            }
         }];
     }];
 }
