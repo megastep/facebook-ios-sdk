@@ -44,9 +44,13 @@
 }
 
 - (void)showDialogFrom:(UIViewController *)vc {
-    // First try to set up a native dialog
+    // First try to set up a native dialog - we can't use the properties so make them part of the description.
+    NSMutableString *nativeDesc = [NSMutableString stringWithFormat:@"%@\n",_textDesc];
+    for (NSString *key in _properties) {
+        [nativeDesc appendString:[NSString stringWithFormat:@"%@: %@\n",key,[_properties objectForKey:key]]];
+    }
     BOOL nativeSuccess = [FBNativeDialogs presentShareDialogModallyFrom:vc
-                                                            initialText:_textDesc
+                                                            initialText:nativeDesc
                                                                   image:(_imgPath ? [UIImage imageNamed:_imgPath] : nil)
                                                                     url:[NSURL URLWithString:_appURL]
                                                                 handler:^(FBNativeDialogResult result, NSError *error) {
