@@ -189,6 +189,10 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     return FBSession.activeSession.isOpen;
 }
 
+- (BOOL)isNativeSession {
+    return FBSession.activeSession.loginType == FBSessionLoginTypeSystemAccount;
+}
+
 /**
  * A function for parsing URL parameters.
  */

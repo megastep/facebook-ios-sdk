@@ -61,6 +61,8 @@ extern NSString *const FBSessionStateChangedNotification;
 - (void)logout;
 
 - (BOOL)isSessionValid;
+// Did we use the native iOS 6 Facebook login from the system?
+- (BOOL)isNativeSession;
 
 - (void)handleDidBecomeActive;
 
