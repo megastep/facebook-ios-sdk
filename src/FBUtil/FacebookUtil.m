@@ -198,6 +198,13 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     return FBSession.activeSession.loginType == FBSessionLoginTypeSystemAccount;
 }
 
+- (UIView *)profilePictureViewOfSize:(CGFloat)side {
+    FBProfilePictureView *profileView = [[FBProfilePictureView alloc] initWithProfileID:self.userID
+                                                                        pictureCropping:FBProfilePictureCroppingSquare];
+    profileView.bounds = CGRectMake(0.0f, 0.0f, side, side);
+    return profileView;
+}
+
 /**
  * A function for parsing URL parameters.
  */

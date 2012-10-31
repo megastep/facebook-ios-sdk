@@ -74,6 +74,9 @@ extern NSString *const FBSessionStateChangedNotification;
 - (void)publishAchievement:(NSString *)achievement;
 - (void)publishScore:(NSUInteger)score;
 
+// Get a square FBProfilePictureView for the logged-in user
+- (UIView *)profilePictureViewOfSize:(CGFloat)side;
+
 // Common dialogs - handle authentification automatically when needed
 
 // Publish a story on the users's feed
