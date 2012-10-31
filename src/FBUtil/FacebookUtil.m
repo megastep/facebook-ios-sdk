@@ -131,9 +131,13 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         _fetchUserInfo = fetch;
         _namespace = [ns copy];
         _delegate = delegate;
-        
-        [FBSession setDefaultAppID:appID];
-        
+
+        FBSession *session = [[FBSession alloc] initWithAppID:appID
+                                                  permissions:nil
+                                              urlSchemeSuffix:suffix
+                                           tokenCacheStrategy:nil];
+        [FBSession setActiveSession:session];
+
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         
         BOOL facebook_reset = [defaults boolForKey:@"facebook_reset"];
@@ -172,13 +176,14 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 - (BOOL)login:(BOOL)doAuthorize andThen:(void (^)(void))handler {
     _afterLogin = [handler copy];
-    return [FBSession openActiveSessionWithReadPermissions:nil
-                                              allowLoginUI:doAuthorize
-                                         completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
-                                             [self sessionStateChanged:session
-                                                                 state:status
-                                                                 error:error];
-                                         }];
+    if (doAuthorize || (FBSession.activeSession.state == FBSessionStateCreatedTokenLoaded)) {
+        [FBSession.activeSession openWithCompletionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
+            [self sessionStateChanged:session
+                                state:status
+                                error:error];
+        }];        
+    }
+    return FBSession.activeSession.isOpen;
 }
 
 - (void)logout {
