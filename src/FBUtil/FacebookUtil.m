@@ -24,7 +24,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     BOOL _loggedIn, _fetchUserInfo, _fromDialog;
     FBShareApp *_shareDialog;
     FBFeedPublish *_feedDialog;
-    NSString *_namespace;
+    NSString *_namespace, *_appID, *_appSuffix;
     void (^_afterLogin)(void);
 }
 
@@ -130,24 +130,10 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     if (self) {
         _fetchUserInfo = fetch;
         _namespace = [ns copy];
+        _appID = [appID copy];
+        _appSuffix = [suffix copy];
         _delegate = delegate;
-
-        FBSession *session = [[FBSession alloc] initWithAppID:appID
-                                                  permissions:nil
-                                              urlSchemeSuffix:suffix
-                                           tokenCacheStrategy:nil];
-        [FBSession setActiveSession:session];
-
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        
-        BOOL facebook_reset = [defaults boolForKey:@"facebook_reset"];
-        if (facebook_reset) {
-            [FBSession.activeSession closeAndClearTokenInformation];
-            [defaults setBool:NO forKey:@"facebook_reset"]; // Don't do it on the next start
-            [defaults synchronize];
-        } else {
-            [self login:NO andThen:nil];
-        }
+        [self login:NO andThen:nil];
     }
     return self;
 }
@@ -176,14 +162,27 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 - (BOOL)login:(BOOL)doAuthorize andThen:(void (^)(void))handler {
     _afterLogin = [handler copy];
-    if (doAuthorize || (FBSession.activeSession.state == FBSessionStateCreatedTokenLoaded)) {
-        [FBSession.activeSession openWithCompletionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
+    FBSession *session = [[FBSession alloc] initWithAppID:_appID
+                                              permissions:nil
+                                          urlSchemeSuffix:_appSuffix
+                                       tokenCacheStrategy:nil];
+    [FBSession setActiveSession:session];
+
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    
+    BOOL facebook_reset = [defaults boolForKey:@"facebook_reset"];
+    if (facebook_reset) {
+        [session closeAndClearTokenInformation];
+        [defaults setBool:NO forKey:@"facebook_reset"]; // Don't do it on the next start
+        [defaults synchronize];
+    } else if (doAuthorize || (session.state == FBSessionStateCreatedTokenLoaded)) {
+        [session openWithCompletionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
             [self sessionStateChanged:session
                                 state:status
                                 error:error];
         }];        
     }
-    return FBSession.activeSession.isOpen;
+    return session.isOpen;
 }
 
 - (void)logout {
