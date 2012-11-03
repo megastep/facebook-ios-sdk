@@ -16,12 +16,14 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 @interface FacebookUtil ()
 - (NSDictionary*)parseURLParams:(NSString *)query;
+- (void)processAchievementData:(id)result;
 @end
 
 @implementation FacebookUtil
 {
     Facebook *_facebook;
     BOOL _loggedIn, _fetchUserInfo, _fromDialog;
+    NSMutableSet *_achievements;
     FBShareApp *_shareDialog;
     FBFeedPublish *_feedDialog;
     NSString *_namespace, *_appID, *_appSuffix;
@@ -133,6 +135,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         _appID = [appID copy];
         _appSuffix = [suffix copy];
         _delegate = delegate;
+        _achievements = [[NSMutableSet alloc] init];
         [self login:NO andThen:nil];
     }
     return self;
@@ -346,9 +349,13 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 }
 
 // Submit the URL to a registered achievement page
-- (void)publishAchievement:(NSString *)achievementURL {
+- (BOOL)publishAchievement:(NSString *)achievementURL {
     if (!self.publishTimeline)
-        return;
+        return NO;
+    
+    if ([_achievements containsObject:achievementURL])
+        return YES;
+    
     [self doWithPermission:@"publish_actions" toDo:^{
         FBRequest *req = [FBRequest requestWithGraphPath:@"me/achievements"
                                               parameters:@{@"achievement":achievementURL}
@@ -358,6 +365,55 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                 NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
                 if ([[errDict objectForKey:@"code"] integerValue] != 3501) { // Duplicate achievement error code from FB
                     NSLog(@"Error publishing achievement: %@", error);
+                } else {
+                    [_achievements addObject:achievementURL];
+                }
+            } else {
+                [_achievements addObject:achievementURL];
+            }
+        }];
+    }];
+    return NO;
+}
+
+- (void)processAchievementData:(id)result {
+
+    for (NSDictionary *dict in result[@"data"]) {
+        [_achievements addObject:dict[@"achievement"][@"url"]];
+    }
+    NSDictionary *paging = result[@"paging"];
+    if (paging[@"next"]) { // need to send another request
+        FBRequest *request = [[FBRequest alloc] initWithSession:nil
+                                                      graphPath:nil];
+        FBRequestConnection *connection = [[FBRequestConnection alloc] init];
+        [connection addRequest:request completionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+            if (error) {
+                NSLog(@"Error processing paging: %@", error);
+            } else {
+                [self processAchievementData:result];
+            }
+        }];
+        NSURL *url = [NSURL URLWithString:paging[@"next"]];
+        connection.urlRequest = [NSMutableURLRequest requestWithURL:url];
+        [connection start];
+    }
+}
+
+// Retrieve the list of achievements earned from Facebook
+- (void)fetchAchievementsAndThen:(void (^)(NSSet *achievements))handler
+{
+    [self doWithPermission:@"publish_actions" toDo:^{
+        FBRequest *req = [FBRequest requestWithGraphPath:@"me/achievements"
+                                              parameters:nil
+                                              HTTPMethod:@"GET"];
+        [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+            if (error) {
+                NSLog(@"Failed to retrieve FB achievements: %@", error);
+            } else {
+                [_achievements removeAllObjects];
+                [self processAchievementData:result];
+                if (handler) {
+                    handler(_achievements);
                 }
             }
         }];

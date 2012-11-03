@@ -71,7 +71,9 @@ extern NSString *const FBSessionStateChangedNotification;
 - (void)publishLike:(NSString *)url andThen:(void (^)(NSString *likeID))completion;
 - (void)publishUnlike:(NSString *)likeID;
 
-- (void)publishAchievement:(NSString *)achievement;
+- (void)fetchAchievementsAndThen:(void (^)(NSSet *achievements))handler;
+// Returns YES if the achievement was already submitted
+- (BOOL)publishAchievement:(NSString *)achievement;
 - (void)publishScore:(NSUInteger)score;
 
 // Get a square FBProfilePictureView for the logged-in user
