@@ -402,21 +402,20 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 // Retrieve the list of achievements earned from Facebook
 - (void)fetchAchievementsAndThen:(void (^)(NSSet *achievements))handler
 {
-    [self doWithPermission:@"publish_actions" toDo:^{
-        FBRequest *req = [FBRequest requestWithGraphPath:@"me/achievements"
-                                              parameters:nil
-                                              HTTPMethod:@"GET"];
-        [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
-            if (error) {
-                NSLog(@"Failed to retrieve FB achievements: %@", error);
-            } else {
-                [_achievements removeAllObjects];
-                [self processAchievementData:result];
-                if (handler) {
-                    handler(_achievements);
-                }
+    // We probably don't need to request extended permissions just to get the list of earned achievements
+    FBRequest *req = [FBRequest requestWithGraphPath:@"me/achievements"
+                                          parameters:nil
+                                          HTTPMethod:@"GET"];
+    [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+        if (error) {
+            NSLog(@"Failed to retrieve FB achievements: %@", error);
+        } else {
+            [_achievements removeAllObjects];
+            [self processAchievementData:result];
+            if (handler) {
+                handler(_achievements);
             }
-        }];
+        }
     }];
 }
 
