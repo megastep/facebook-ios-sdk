@@ -179,7 +179,8 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         [defaults setBool:NO forKey:@"facebook_reset"]; // Don't do it on the next start
         [defaults synchronize];
     } else if (doAuthorize || (session.state == FBSessionStateCreatedTokenLoaded)) {
-        [session openWithCompletionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
+        [session openWithBehavior:FBSessionLoginBehaviorUseSystemAccountIfPresent
+                completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
             [self sessionStateChanged:session
                                 state:status
                                 error:error];
