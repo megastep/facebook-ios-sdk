@@ -7,8 +7,16 @@
 //
 
 #import "FBShareApp.h"
+#import "FBGraphUserExtraFields.h"
 
-@implementation FBShareApp
+@implementation FBShareApp {
+    NSString *_message;
+    NSMutableArray *_fbFriends;
+    FacebookUtil *_facebookUtil;
+    FBFriendPickerViewController *_friendPickerController;
+    UIViewController *_presenter;
+}
+
 
 - (id)initWithFacebookUtil:(FacebookUtil *)fb message:(NSString *)msg {
     self = [super init];
@@ -19,111 +27,124 @@
     return self;
 }
 
-- (void)showActualDialog {
-    if ([_fbFriends count] == 0) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"No Friends", @"Alert dialog title")
-                                                        message:NSLocalizedString(@"No friends are available to share with.", @"Alert dialog message")
-                                                       delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"Cancel", @"Alert button")
-                                              otherButtonTitles:nil];
-        [alert show];
-        [alert release];
-    } else {
-        NSString *friendString = [_fbFriends componentsJoinedByString:@","];
-#ifdef DEBUG
-        NSLog(@"Users to recommend: %@", friendString);
-#endif
-        NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                       _message,@"message",
-                                       NSLocalizedString(@"Check this app out!",@"Facebook request notification text"), @"notification_text",
-                                       nil];
-        if (friendString) {
-            [params setObject:friendString forKey:@"suggestions"];
+- (void)presentFromViewController:(UIViewController *)controller {
+    if (FBSession.activeSession.isOpen) {
+        _friendPickerController = [[FBFriendPickerViewController alloc] init];
+        _friendPickerController.modalPresentationStyle = UIModalPresentationFormSheet;
+        
+        // Configure the picker ...
+        _friendPickerController.title = NSLocalizedString(@"Select Friends",@"Facebook friend picker title");
+        // Set this view controller as the friend picker delegate
+        _friendPickerController.delegate = self;
+        // Ask for friend device data
+        _friendPickerController.fieldsForRequest = [NSSet setWithObjects:@"devices", @"installed", nil];
+        
+        // Fetch the data
+        [_friendPickerController loadData];
+        [_friendPickerController clearSelection];
+        
+        // Present view controller modally.
+        _presenter = controller;
+        if ([_presenter respondsToSelector:@selector(presentViewController:animated:completion:)]) {
+            // iOS 5+
+            [_presenter presentViewController:_friendPickerController
+                                     animated:YES
+                                   completion:nil];
+        } else {
+            [_presenter presentModalViewController:_friendPickerController
+                                          animated:YES];
         }
         
-        [_facebookUtil.facebook dialog:@"apprequests"
-                             andParams:params
-                           andDelegate:self];
-    }
-}
-
-- (void)showDialog {
-    if (_fbFriends == nil) {
-        if ([_facebookUtil.delegate respondsToSelector:@selector(startedFetchingFromFacebook:)]) {
-            [_facebookUtil.delegate startedFetchingFromFacebook:_facebookUtil];
-        }
-        // Fetch the list of friends who are not using the app and present the dialog
-        NSString *q = @"{\"users\":\"SELECT uid FROM user WHERE is_app_user=1 AND uid IN (SELECT uid2 FROM friend WHERE uid1=me())\","
-                        "\"all\":\"SELECT uid,devices FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1=me())\"}";
-        [_facebookUtil.facebook requestWithGraphPath:[NSString stringWithFormat:@"fql?q=%@",[q stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]
-                                         andDelegate:self];
     } else {
-        [self showActualDialog];
+        [_facebookUtil login:YES andThen:^{
+            [self presentFromViewController:controller];
+        }];
     }
 }
 
-- (void)request:(FBRequest *)request didFailWithError:(NSError *)error
+- (BOOL)friendPickerViewController:(FBFriendPickerViewController *)friendPicker
+                 shouldIncludeUser:(id<FBGraphUserExtraFields>)user
 {
-    if ([_facebookUtil.delegate respondsToSelector:@selector(endedFetchingFromFacebook:)]) {
-        [_facebookUtil.delegate endedFetchingFromFacebook:_facebookUtil];
+    // Ignore users who are already using the app
+    if ([user.installed boolValue] == YES)
+        return NO;
+    
+    NSArray *deviceData = user.devices;
+    // Loop through list of devices
+    for (NSDictionary *deviceObject in deviceData) {
+        // Check if there is a device match
+        if ([@"iOS" isEqualToString:[deviceObject objectForKey:@"os"]]) {
+            // Friend is an iOS user, include them in the display
+            return YES;
+        }
     }
+    // Friend is not an iOS user, do not include them
+    return NO;
 }
 
-- (void)request:(FBRequest *)request didLoad:(id)result
+- (void)friendPickerViewController:(FBFriendPickerViewController *)friendPicker
+                       handleError:(NSError *)error
+{
+    NSLog(@"FriendPickerViewController error: %@", error);
+}
+
+- (void)facebookViewControllerCancelWasPressed:(id)sender
 {
 #ifdef DEBUG
-    //NSLog(@"FBShareApp received FB result: %@", result);
+    NSLog(@"Friend selection cancelled.");
 #endif
-    // Parse results and create list of friends who are not using the app
-    NSArray *data = [result objectForKey:@"data"];
-    NSAssert([data count] == 2, @"Incorrect number of data returned: %d", [data count]);
-    
-    NSMutableSet *users = nil;
-    NSMutableSet *all = nil;
-    
-    for(NSDictionary *resultSet in data) {
-        NSString *name = [resultSet objectForKey:@"name"];
-        NSDictionary *result = [resultSet objectForKey:@"fql_result_set"];
-        if ([name isEqualToString:@"users"]) {
-            users = [NSMutableSet setWithCapacity:[result count]];
-            for(NSDictionary *user in result) {
-                [users addObject:[user objectForKey:@"uid"]];
-            }
-        } else if ([name isEqualToString:@"all"]) {
-            // Filter out friends who don't have an iOS device
-            all = [NSMutableSet setWithCapacity:[result count]];
-            for(NSDictionary *user in result) {
-                NSArray *devices = [user objectForKey:@"devices"];
-                for (NSDictionary *device in devices) {
-                    NSString *os = [device objectForKey:@"os"];
-                    if ([os isEqualToString:@"iOS"]) {
-                        [all addObject:[user objectForKey:@"uid"]];
-                        break;
-                    }
-                }
-            }
-        }
+    if ([_presenter respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
+        [_presenter dismissViewControllerAnimated:YES completion:^{
+            _presenter = nil;
+        }];
+    } else {
+        [_presenter dismissModalViewControllerAnimated:YES];
+        _presenter = nil;
     }
-    
-    [_fbFriends release];
-    _fbFriends = [[NSMutableArray alloc] initWithCapacity:[all count] - [users count]];
-    
-    if ([users count] == 0) { // No existing users - just include everybody
-        for(NSNumber *user in all) {
-            [_fbFriends addObject:user];
-        }
-    } else { // Exclude existing users
-        for(NSNumber *user in all) {
-            if (![users containsObject:user]) {
-                [_fbFriends addObject:user];                
-            }
-        }
-    }
-    if ([_facebookUtil.delegate respondsToSelector:@selector(endedFetchingFromFacebook:)]) {
-        [_facebookUtil.delegate endedFetchingFromFacebook:_facebookUtil];
-    }
+}
 
-    [self showActualDialog];
+- (void)facebookViewControllerDoneWasPressed:(id)sender
+{
+    FBFriendPickerViewController *fpc = (FBFriendPickerViewController *)sender;
+    _fbFriends = [[NSMutableArray alloc] initWithCapacity:[fpc.selection count]];
+    for (id<FBGraphUserExtraFields> user in fpc.selection) {
+#ifdef DEBUG
+        NSLog(@"Friend selected: %@", user.name);
+#endif
+        [_fbFriends addObject:user.id];
+    }
+    if ([_presenter respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
+        [_presenter dismissViewControllerAnimated:YES completion:^{
+            [self showActualDialog];
+            _presenter = nil;
+        }];
+    } else {
+        [_presenter dismissModalViewControllerAnimated:YES];
+        [self showActualDialog];
+        _presenter = nil;
+    }
+}
+
+- (void)showActualDialog {
+    if ([_fbFriends count] == 0) {
+        return;
+    }
+    
+    NSString *friendString = [_fbFriends componentsJoinedByString:@","];
+#ifdef DEBUG
+    NSLog(@"Users to send to: %@", friendString);
+#endif
+    NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   _message,@"message",
+                                   NSLocalizedString(@"Check this app out!",@"Facebook request notification text"), @"notification_text",
+                                   nil];
+    if (friendString) {
+        [params setObject:friendString forKey:@"to"];
+    }
+    
+    [_facebookUtil.facebook dialog:@"apprequests"
+                         andParams:params
+                       andDelegate:self];
 }
 
 - (void)dialog:(FBDialog *)dialog didFailWithError:(NSError*)error {
@@ -132,8 +153,8 @@
 #endif
 	if ([error code] == 190) {
 		// Invalid token - force login
-		[_facebookUtil forgetAccessToken];
-		[_facebookUtil login:YES];
+		[_facebookUtil logout];
+		[_facebookUtil login:YES andThen:nil];
 	} else {
 		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
 														message:[NSString stringWithFormat:@"%@.",[error localizedDescription]] 
@@ -141,7 +162,6 @@
 											  cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
 											  otherButtonTitles:nil];
 		[alert show];
-		[alert release];
 	}
 }
 
@@ -150,10 +170,9 @@
         [_facebookUtil.delegate sharedWithFriends];
 }
 
-- (void)dealloc {
-    [_message release];
-    [_fbFriends release];
-    [super dealloc];
+- (void)dealloc
+{
+    _friendPickerController.delegate = nil;
 }
 
 @end

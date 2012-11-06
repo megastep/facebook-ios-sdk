@@ -8,21 +8,21 @@
 
 #import <Foundation/Foundation.h>
 #import "FacebookUtil.h"
+#import "Facebook.h"
 
-@interface FBFeedPublish : NSObject <FacebookUtilDialog, FBDialogDelegate> {
-    FacebookUtil *_facebookUtil;
-    NSDictionary *_properties;
-    NSString *_caption, *_description, *_name, *_appURL, *_imgURL, *_imgLink;
-}
+@interface FBFeedPublish : NSObject <FBDialogDelegate>
 
 - (id)initWithFacebookUtil:(FacebookUtil *)fb
                    caption:(NSString *)caption 
-               description:(NSString *)desc
+               description:(NSString *)desc // May include HTML
+           textDescription:(NSString *)txt
                       name:(NSString *)name
                 properties:(NSDictionary *)props
                     appURL:(NSString *)appURL
+                 imagePath:(NSString *)path
                   imageURL:(NSString *)img
                  imageLink:(NSString *)imgURL;
 
+- (void)showDialogFrom:(UIViewController *)vc;
 
 @end

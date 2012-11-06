@@ -17,8 +17,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#define kDialogBaseURL @"https://m.facebook.com/dialog/"
-
 @protocol FBDialogDelegate;
 @class FBFrictionlessRequestSettings;
 
@@ -54,7 +52,6 @@
  * The parameters.
  */
 @property(nonatomic, retain) NSMutableDictionary* params;
-@property(nonatomic, readonly) NSString *action;
 
 - (NSString *) getStringFromUrl: (NSString*) url needle:(NSString *) needle;
 

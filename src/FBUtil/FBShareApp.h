@@ -8,13 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "FacebookUtil.h"
+#import "Facebook.h"
 
-@interface FBShareApp : NSObject <FacebookUtilDialog, FBRequestDelegate, FBDialogDelegate> {
-    NSString *_message;
-    NSMutableArray *_fbFriends;
-    FacebookUtil *_facebookUtil;
-}
+@interface FBShareApp : NSObject <FBDialogDelegate, FBFriendPickerDelegate>
 
 - (id)initWithFacebookUtil:(FacebookUtil *)fb message:(NSString *)msg;
+
+- (void)presentFromViewController:(UIViewController *)controller;
 
 @end
