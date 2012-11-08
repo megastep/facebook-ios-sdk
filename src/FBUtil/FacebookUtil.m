@@ -249,15 +249,9 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                      }];
         }
     } else {
-        _afterLogin = [handler copy];
-        [FBSession openActiveSessionWithPublishPermissions:@[permission]
-                                           defaultAudience:FBSessionDefaultAudienceEveryone
-                                              allowLoginUI:YES
-                                         completionHandler:^(FBSession *session, FBSessionState status, NSError *error) {
-                                             [self sessionStateChanged:session
-                                                                 state:status
-                                                                 error:error];
-                                         }];
+        [self login:YES andThen:^{
+            [self doWithPermission:permission toDo:handler];
+        }];
     }
 }
 
