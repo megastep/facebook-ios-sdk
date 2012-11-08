@@ -58,6 +58,7 @@ extern NSString *const FBSessionStateChangedNotification;
 - (BOOL)handleOpenURL:(NSURL *)url;
 
 - (BOOL)login:(BOOL)doAuthorize andThen:(void (^)(void))handler;
+- (BOOL)login:(BOOL)doAuthorize withPermissions:(NSArray *)perms andThen:(void (^)(void))handler;
 - (void)logout;
 
 - (BOOL)isSessionValid;

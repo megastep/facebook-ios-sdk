@@ -113,7 +113,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     
     if (error) {
         UIAlertView *alertView = [[UIAlertView alloc]
-                                  initWithTitle:@"FB Error"
+                                  initWithTitle:@"Facebook Error"
                                   message:error.localizedDescription
                                   delegate:nil
                                   cancelButtonTitle:@"OK"
@@ -163,10 +163,11 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     [FBSession.activeSession handleDidBecomeActive];
 }
 
-- (BOOL)login:(BOOL)doAuthorize andThen:(void (^)(void))handler {
+- (BOOL)login:(BOOL)doAuthorize withPermissions:(NSArray *)perms andThen:(void (^)(void))handler {
     _afterLogin = [handler copy];
     FBSession *session = [[FBSession alloc] initWithAppID:_appID
-                                              permissions:nil
+                                              permissions:perms
+                                          defaultAudience:FBSessionDefaultAudienceEveryone
                                           urlSchemeSuffix:_appSuffix
                                        tokenCacheStrategy:nil];
     [FBSession setActiveSession:session];
@@ -187,6 +188,10 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         }];        
     }
     return session.isOpen;
+}
+
+- (BOOL)login:(BOOL)doAuthorize andThen:(void (^)(void))handler {
+    return [self login:doAuthorize withPermissions:nil andThen:handler];
 }
 
 - (void)logout {
@@ -242,6 +247,9 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         if ([FBSession.activeSession.permissions containsObject:permission]) {
             handler();
         } else {
+#ifdef DEBUG
+            NSLog(@"Reauthorizing for permission: %@", permission);
+#endif
             [FBSession.activeSession reauthorizeWithPublishPermissions:@[permission]
                                                        defaultAudience:FBSessionDefaultAudienceEveryone
                                                      completionHandler:^(FBSession *session, NSError *error) {
@@ -249,7 +257,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                      }];
         }
     } else {
-        [self login:YES andThen:^{
+        [self login:YES withPermissions:[NSArray arrayWithObject:permission] andThen:^{
             [self doWithPermission:permission toDo:handler];
         }];
     }
