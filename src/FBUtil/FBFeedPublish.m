@@ -16,6 +16,8 @@
     NSString *_caption, *_description, *_textDesc, *_name, *_appURL, *_imgURL, *_imgLink, *_imgPath;
 }
 
+@synthesize expandProperties = _expandProperties;
+
 - (id)initWithFacebookUtil:(FacebookUtil *)fb
                    caption:(NSString *)caption 
                description:(NSString *)desc
@@ -46,8 +48,15 @@
 - (void)showDialogFrom:(UIViewController *)vc {
     // First try to set up a native dialog - we can't use the properties so make them part of the description.
     NSMutableString *nativeDesc = [NSMutableString stringWithFormat:@"%@\n",_textDesc];
-    for (NSString *key in _properties) {
-        [nativeDesc appendString:[NSString stringWithFormat:@"%@: %@\n",key,[_properties objectForKey:key]]];
+    if (self.expandProperties) {
+        for (NSString *key in _properties) {
+            id value = [_properties objectForKey:key];
+            if ([value isKindOfClass:[NSDictionary class]]) {
+                value = [value objectForKey:@"text"];
+            }
+            if (value)
+                [nativeDesc appendString:[NSString stringWithFormat:@"%@: %@\n",key,value]];
+        }
     }
     BOOL nativeSuccess = [FBNativeDialogs presentShareDialogModallyFrom:vc
                                                             initialText:nativeDesc

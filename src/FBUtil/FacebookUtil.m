@@ -270,6 +270,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                  textDescription:(NSString *)text
                             name:(NSString *)name
                       properties:(NSDictionary *)props
+                expandProperties:(BOOL)expand
                           appURL:(NSString *)appURL
                        imagePath:(NSString *)imgPath
                         imageURL:(NSString *)img
@@ -287,6 +288,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                         imagePath:imgPath
                                                          imageURL:img
                                                         imageLink:imgURL];
+        _feedDialog.expandProperties = expand;
         [_feedDialog showDialogFrom:vc];
     }];
 }

@@ -12,6 +12,9 @@
 
 @interface FBFeedPublish : NSObject <FBDialogDelegate>
 
+// Whether to included a text version of the properties array with native dialogs; NO by default
+@property (nonatomic) BOOL expandProperties;
+
 - (id)initWithFacebookUtil:(FacebookUtil *)fb
                    caption:(NSString *)caption 
                description:(NSString *)desc // May include HTML

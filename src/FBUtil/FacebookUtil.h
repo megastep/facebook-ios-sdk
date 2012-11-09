@@ -88,6 +88,7 @@ extern NSString *const FBSessionStateChangedNotification;
                  textDescription:(NSString *)text
                             name:(NSString *)name
                       properties:(NSDictionary *)props
+                expandProperties:(BOOL)expand
                           appURL:(NSString *)appURL
                        imagePath:(NSString *)imgPath
                         imageURL:(NSString *)img
