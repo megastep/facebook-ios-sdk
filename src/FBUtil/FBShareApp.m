@@ -47,6 +47,9 @@
         _presenter = controller;
         if ([_presenter respondsToSelector:@selector(presentViewController:animated:completion:)]) {
             // iOS 5+
+            if (_presenter.presentedViewController != nil) {
+                _presenter = _presenter.presentedViewController;
+            }
             [_presenter presentViewController:_friendPickerController
                                      animated:YES
                                    completion:nil];
