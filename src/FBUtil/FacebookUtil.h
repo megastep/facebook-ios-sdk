@@ -75,6 +75,8 @@ extern NSString *const FBSessionStateChangedNotification;
 - (void)fetchAchievementsAndThen:(void (^)(NSSet *achievements))handler;
 // Returns YES if the achievement was already submitted
 - (BOOL)publishAchievement:(NSString *)achievement;
+- (void)removeAchievement:(NSString *)achievement;
+- (void)removeAllAchievements;
 - (void)publishScore:(NSUInteger)score;
 
 // Get a square FBProfilePictureView for the logged-in user

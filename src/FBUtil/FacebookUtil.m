@@ -381,6 +381,53 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     return NO;
 }
 
+- (void)removeAchievement:(NSString *)achievementURL {
+    if (![_achievements containsObject:achievementURL])
+        return;
+    
+    [self doWithPermission:@"publish_actions" toDo:^{
+        FBRequest *req = [FBRequest requestWithGraphPath:@"me/achievements"
+                                              parameters:@{@"achievement":achievementURL}
+                                              HTTPMethod:@"DELETE"];
+        [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+            if (error) {
+                NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
+                if ([[errDict objectForKey:@"code"] integerValue] != 3404) { // No such achievement for user error code from FB
+                    NSLog(@"Error deleting achievement: %@", error);
+                } else {
+                    [_achievements removeObject:achievementURL];
+                }
+            } else {
+                [_achievements removeObject:achievementURL];
+            }
+        }];
+    }];
+
+}
+
+- (void)removeAllAchievements {
+    if ([_achievements count] == 0)
+        return;
+ 
+    [self doWithPermission:@"publish_actions" toDo:^{
+        for (NSString *achievementURL in _achievements) {
+            FBRequest *req = [FBRequest requestWithGraphPath:@"me/achievements"
+                                                  parameters:@{@"achievement":achievementURL}
+                                                  HTTPMethod:@"DELETE"];
+            [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+                if (error) {
+                    NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
+                    if ([[errDict objectForKey:@"code"] integerValue] != 3404) { // No such achievement for user error code from FB
+                        NSLog(@"Error deleting achievement: %@", error);
+                    }
+                 }
+            }];
+        }
+        [_achievements removeAllObjects];
+    }];
+
+}
+
 - (void)processAchievementData:(id)result {
 
     for (NSDictionary *dict in result[@"data"]) {
