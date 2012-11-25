@@ -153,7 +153,9 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 + (BOOL)openPage:(unsigned long long)uid {
 	NSString *fburl = [NSString stringWithFormat:@"fb://profile/%lld",uid];
 	if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:fburl]] == NO) {
-		NSString *url = [NSString stringWithFormat:@"http://touch.facebook.com/profile.php?id=%lld",uid];
+        // We can redirect iPad users to the regular site
+        NSString *site = (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) ? @"touch" : @"www";
+		NSString *url = [NSString stringWithFormat:@"http://%@.facebook.com/profile.php?id=%lld",site,uid];
 		return [[UIApplication sharedApplication] openURL:[NSURL URLWithString:url]];
 	}
 	return NO;
