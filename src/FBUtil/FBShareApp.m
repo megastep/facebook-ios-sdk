@@ -3,7 +3,7 @@
 //  Hold the data for the dialog to share the app with friends.
 //
 //  Created by Stéphane Peter on 10/26/11.
-//  Copyright (c) 2011 Catloaf Software, LLC. All rights reserved.
+//  Copyright (c) 2011-2013 Catloaf Software, LLC. All rights reserved.
 //
 
 #import "FBShareApp.h"
@@ -23,6 +23,9 @@
     if (self) {
         _facebookUtil = fb;
         _message = [msg copy];
+        if ([_message length] > 60) {
+            NSLog(@"WARNING: FB message is over 60 characters, will almost certainly fail.");
+        }
     }
     return self;
 }
