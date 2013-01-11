@@ -174,6 +174,11 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                        tokenCacheStrategy:nil];
     [FBSession setActiveSession:session];
 
+    // Check whether we have a token for an old app ID - force reset if the ID changed!
+    if (session.state == FBSessionStateCreatedTokenLoaded && ![session.appID isEqualToString:_appID]) {
+        [session closeAndClearTokenInformation];
+    }
+    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
     BOOL facebook_reset = [defaults boolForKey:@"facebook_reset"];
