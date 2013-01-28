@@ -98,11 +98,13 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
             _userID = nil;
             _loggedIn = NO;
             _facebook = nil;
-            if ([_delegate respondsToSelector:@selector(facebookLoggedOut)]) {
-                [_delegate facebookLoggedOut];
+            if (state != FBSessionStateClosedLoginFailed) { // No need to notify if we simply failed to log in
+                if ([_delegate respondsToSelector:@selector(facebookLoggedOut)]) {
+                    [_delegate facebookLoggedOut];
+                }
+                [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedOutNotification
+                                                                    object:self];
             }
-            [[NSNotificationCenter defaultCenter] postNotificationName:kFBUtilLoggedOutNotification
-                                                                object:self];
             break;
         default:
             break;
