@@ -31,6 +31,7 @@ static NSString* kRestserverBaseURL = @"https://api." FB_BASE_URL "/method/";
 static NSString* kFBAppAuthURLScheme = @"fbauth";
 static NSString* kFBAppAuthURLPath = @"authorize";
 static NSString* kRedirectURL = @"fbconnect://success";
+#pragma unused (kGraphBaseURL,kRestserverBaseURL,kFBAppAuthURLScheme,kFBAppAuthURLPath)
 
 static NSString* kLogin = @"oauth";
 static NSString* kApprequests = @"apprequests";
