@@ -262,7 +262,7 @@
 }
 
 - (BOOL)shouldAutorotate {
-    UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
     
     return [self shouldAutorotateToInterfaceOrientation:orientation];
 }

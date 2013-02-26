@@ -26,7 +26,6 @@
 
 static NSString* kDialogBaseURL = @"https://m." FB_BASE_URL "/dialog/";
 static NSString* kRedirectURL = @"fbconnect://success";
-#pragma unused (kGraphBaseURL,kRestserverBaseURL,kFBAppAuthURLScheme,kFBAppAuthURLPath)
 
 static NSString* kLogin = @"oauth";
 static NSString* kApprequests = @"apprequests";
