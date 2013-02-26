@@ -52,8 +52,8 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                 andDelegate:nil];
                 
                 // Store the Facebook session information
-                _facebook.accessToken = FBSession.activeSession.accessToken;
-                _facebook.expirationDate = FBSession.activeSession.expirationDate;
+                _facebook.accessToken = FBSession.activeSession.accessTokenData.accessToken;
+                _facebook.expirationDate = FBSession.activeSession.accessTokenData.expirationDate;
                 
                 _loggedIn = YES;
                 
@@ -212,7 +212,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 }
 
 - (BOOL)isNativeSession {
-    return FBSession.activeSession.loginType == FBSessionLoginTypeSystemAccount;
+    return FBSession.activeSession.accessTokenData.loginType == FBSessionLoginTypeSystemAccount;
 }
 
 - (UIView *)profilePictureViewOfSize:(CGFloat)side {
@@ -257,13 +257,13 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
             handler();
         } else {
 #ifdef DEBUG
-            NSLog(@"Reauthorizing for permission: %@", permission);
+            NSLog(@"Requesting new permission: %@", permission);
 #endif
-            [FBSession.activeSession reauthorizeWithPublishPermissions:@[permission]
-                                                       defaultAudience:FBSessionDefaultAudienceEveryone
-                                                     completionHandler:^(FBSession *session, NSError *error) {
-                                                         handler();
-                                                     }];
+            [FBSession.activeSession requestNewPublishPermissions:@[permission]
+                                                  defaultAudience:FBSessionDefaultAudienceEveryone
+                                                completionHandler:^(FBSession *session, NSError *error) {
+                                                    handler();
+                                                }];
         }
     } else {
         [self login:YES withPermissions:[NSArray arrayWithObject:permission] andThen:^{
