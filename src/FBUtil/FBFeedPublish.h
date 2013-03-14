@@ -10,7 +10,7 @@
 #import "FacebookUtil.h"
 #import "Facebook.h"
 
-@interface FBFeedPublish : NSObject <FBDialogDelegate>
+@interface FBFeedPublish : NSObject
 
 // Whether to included a text version of the properties array with native dialogs; NO by default
 @property (nonatomic) BOOL expandProperties;

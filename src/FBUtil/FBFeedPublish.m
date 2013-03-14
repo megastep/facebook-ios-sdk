@@ -4,7 +4,7 @@
 //
 //  Created by Stéphane Peter on 10/26/11.
 //
-//  Copyright (c) 2011 Catloaf Software, LLC. All rights reserved.
+//  Copyright (c) 2013 Catloaf Software, LLC. All rights reserved.
 //
 
 #import "FBFeedPublish.h"
@@ -71,7 +71,16 @@
                                                                     }
                                                                     
                                                                     if (error) {
-                                                                        NSLog(@"FBNativeDialogs error: %@", error);
+                                                                        if (error.fberrorShouldNotifyUser) {
+                                                                            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                                                                                                            message:error.fberrorUserMessage
+                                                                                                                           delegate:nil
+                                                                                                                  cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                                                                                                                  otherButtonTitles:nil];
+                                                                            [alert show];
+                                                                        } else if (error.fberrorCategory != FBErrorCategoryUserCancelled) {
+                                                                            NSLog(@"Native Feed Dialog Error: %@", error);
+                                                                        }
                                                                     }
                                                                 }];
     
@@ -99,35 +108,26 @@
         }
         
         //NSLog(@"Story params: %@", [jsonWriter stringWithObject:params]);
-        [_facebookUtil.facebook dialog:@"feed"
-                             andParams:params
-                           andDelegate:self];
+        [FBWebDialogs presentFeedDialogModallyWithSession:nil
+                                               parameters:params
+                                                  handler:^(FBWebDialogResult result, NSURL *resultURL, NSError *error) {
+                                                      if (result == FBWebDialogResultDialogCompleted) {
+                                                          if ([_facebookUtil.delegate respondsToSelector:@selector(publishedToFeed)])
+                                                              [_facebookUtil.delegate publishedToFeed];
+                                                      }
+                                                      if (error) {
+                                                          if (error.fberrorShouldNotifyUser) {
+                                                              [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                                                                                              message:error.fberrorUserMessage
+                                                                                                             delegate:nil
+                                                                                                    cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                                                                                                    otherButtonTitles:nil] show];
+                                                          } else if (error.fberrorCategory != FBErrorCategoryUserCancelled) {
+                                                              NSLog(@"Feed Dialog Error: %@", error);
+                                                          }
+                                                      }
+                                                  }];
     }
-}
-
-#pragma mark - FBDialog delegate methods
-
-- (void)dialog:(FBDialog *)dialog didFailWithError:(NSError*)error {
-#ifdef DEBUG
-    NSLog(@"FB feed dialog failed with error: %@", error);
-#endif
-	if ([error code] == 190) {
-		// Invalid token - force login
-		[_facebookUtil logout];
-		[_facebookUtil login:YES andThen:nil];
-	} else {
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
-														message:[NSString stringWithFormat:@"%@.",[error localizedDescription]] 
-													   delegate:nil
-											  cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
-											  otherButtonTitles:nil];
-		[alert show];
-	}
-}
-
-- (void)dialogDidComplete:(FBDialog *)dialog {
-    if ([_facebookUtil.delegate respondsToSelector:@selector(publishedToFeed)])
-        [_facebookUtil.delegate publishedToFeed];
 }
 
 @end

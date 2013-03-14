@@ -42,7 +42,6 @@ extern NSString *const FBSessionStateChangedNotification;
 @property (nonatomic,readonly) BOOL loggedIn, publishTimeline;
 @property (nonatomic,readonly) NSString *fullName, *userID;
 @property (nonatomic,readonly) id<FacebookUtilDelegate> delegate;
-@property (nonatomic,readonly) Facebook *facebook;
 @property (nonatomic,copy) NSString *appName;
 
 + (BOOL)openPage:(unsigned long long)uid;
@@ -78,6 +77,9 @@ extern NSString *const FBSessionStateChangedNotification;
 - (void)removeAchievement:(NSString *)achievement;
 - (void)removeAllAchievements;
 - (void)publishScore:(NSUInteger)score;
+
+// Log in-app purchases
++ (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency;
 
 // Get a square FBProfilePictureView for the logged-in user
 - (UIView *)profilePictureViewOfSize:(CGFloat)side;

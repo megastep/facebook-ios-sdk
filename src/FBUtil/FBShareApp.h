@@ -10,7 +10,7 @@
 #import "FacebookUtil.h"
 #import "Facebook.h"
 
-@interface FBShareApp : NSObject <FBDialogDelegate, FBFriendPickerDelegate>
+@interface FBShareApp : NSObject <FBFriendPickerDelegate>
 
 - (id)initWithFacebookUtil:(FacebookUtil *)fb message:(NSString *)msg;
 

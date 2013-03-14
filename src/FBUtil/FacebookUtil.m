@@ -21,7 +21,6 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 @implementation FacebookUtil
 {
-    Facebook *_facebook;
     BOOL _loggedIn, _fetchUserInfo, _fromDialog;
     NSMutableSet *_achievements;
     FBShareApp *_shareDialog;
@@ -30,7 +29,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     void (^_afterLogin)(void);
 }
 
-@synthesize loggedIn = _loggedIn, appName = _appName, facebook = _facebook,
+@synthesize loggedIn = _loggedIn, appName = _appName,
     delegate = _delegate, fullName = _fullname, userID = _userID;
 
 + (void)initialize {
@@ -47,13 +46,6 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         case FBSessionStateOpen:
             if (!error) {
                 // We have a valid session
-                // Initiate a Facebook instance
-                _facebook = [[Facebook alloc] initWithAppId:FBSession.activeSession.appID
-                                                andDelegate:nil];
-                
-                // Store the Facebook session information
-                _facebook.accessToken = FBSession.activeSession.accessTokenData.accessToken;
-                _facebook.expirationDate = FBSession.activeSession.accessTokenData.expirationDate;
                 
                 _loggedIn = YES;
                 
@@ -97,7 +89,6 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
             _fullname = nil;
             _userID = nil;
             _loggedIn = NO;
-            _facebook = nil;
             if (state != FBSessionStateClosedLoginFailed) { // No need to notify if we simply failed to log in
                 if ([_delegate respondsToSelector:@selector(facebookLoggedOut)]) {
                     [_delegate facebookLoggedOut];
@@ -114,13 +105,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                         object:session];
     
     if (error) {
-        UIAlertView *alertView = [[UIAlertView alloc]
-                                  initWithTitle:@"Facebook Error"
-                                  message:error.localizedDescription
-                                  delegate:nil
-                                  cancelButtonTitle:@"OK"
-                                  otherButtonTitles:nil];
-        [alertView show];
+        [self handleAuthError:error];
     }
 }
 
@@ -138,6 +123,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         _appSuffix = [suffix copy];
         _delegate = delegate;
         _achievements = [[NSMutableSet alloc] init];
+        [FBInsights setAppVersion:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
         [self login:NO andThen:nil];
     }
     return self;
@@ -146,6 +132,119 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 - (BOOL) publishTimeline {
     return [[NSUserDefaults standardUserDefaults] boolForKey:@"facebook_timeline"];
 }
+
+
+// Various error handling methods
+
+- (void)handleAuthError:(NSError *)error {
+    NSString *alertMessage = nil;
+    
+    if (error.fberrorShouldNotifyUser) {
+        // If the SDK has a message for the user, surface it.
+        alertMessage = error.fberrorUserMessage;
+    } else if (error.fberrorCategory == FBErrorCategoryAuthenticationReopenSession) {
+        // It is important to handle session closures since they can happen
+        // outside of the app. You can inspect the error for more context
+        // but this sample generically notifies the user.
+        alertMessage = NSLocalizedString(@"Your current session is no longer valid. Please log in again.", @"Facebook error message");
+    } else if (error.fberrorCategory == FBErrorCategoryUserCancelled) {
+        // The user has cancelled a login. You can inspect the error
+        // for more context. For this sample, we will simply ignore it.
+#ifdef DEBUG
+        NSLog(@"FB user cancelled login");
+#endif
+    } else {
+        // For simplicity, this sample treats other errors blindly.
+        //alertMessage = @"Error. Please try again later.";
+        NSLog(@"Unexpected FB error:%@", error);
+    }
+    
+    if (alertMessage) {
+        [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                    message:alertMessage
+                                   delegate:nil
+                          cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                          otherButtonTitles:nil] show];
+    }
+}
+
+- (void)handleRequestPermissionError:(NSError *)error
+{
+    if (error.fberrorShouldNotifyUser) {
+        // If the SDK has a message for the user, surface it.
+        [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                    message:error.fberrorUserMessage
+                                   delegate:nil
+                          cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                          otherButtonTitles:nil] show];
+    } else {
+        if (error.fberrorCategory == FBErrorCategoryUserCancelled){
+            // The user has cancelled the request. You can inspect the value and
+            // inner error for more context. Here we simply ignore it.
+#ifdef DEBUG
+            NSLog(@"FB: User cancelled post permissions.");
+#endif
+        } else {
+#ifdef DEBUG
+            NSLog(@"Unexpected error requesting permissions:%@", error);
+#endif
+            [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                        message:@"Unable to request publish permissions"
+                                       delegate:nil
+                              cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                              otherButtonTitles:nil] show];
+        }
+    }
+}
+
+// Helper method to handle errors during API calls
+- (void)handleAPICallError:(NSError *)error forPermission:(NSString *)perms retryWith:(void (^)(void))recallAPI
+{
+    // Some Graph API errors are retriable. For this sample, we will have a simple
+    // retry policy of one additional attempt.
+
+    if (error.fberrorCategory == FBErrorCategoryRetry ||
+        error.fberrorCategory == FBErrorCategoryThrottling) {
+        // We also retry on a throttling error message. A more sophisticated app
+        // should consider a back-off period.
+        if (recallAPI) {
+            // Recovery tactic: Call API again.
+            recallAPI();
+            return;
+        }
+    }
+    
+    // Users can revoke post permissions on your app externally so it
+    // can be worthwhile to request for permissions again at the point
+    // that they are needed. This sample assumes a simple policy
+    // of re-requesting permissions.
+    if (error.fberrorCategory == FBErrorCategoryPermissions && perms) {
+#ifdef DEBUG
+        NSLog(@"Re-requesting permissions: %@", perms);
+#endif
+        // Recovery tactic: Ask for required permissions again.
+        [self doWithPermission:perms toDo:recallAPI];
+        return;
+    }
+    
+    NSString *alertMessage;
+    if (error.fberrorShouldNotifyUser) {
+        // If the SDK has a message for the user, surface it.
+        alertMessage = error.fberrorUserMessage;
+    } else {
+        NSLog(@"Unexpected error posting to open graph: %@", error);
+        //alertMessage = @"Unable to post to open graph. Please try again later.";
+    }
+    
+    if (alertMessage) {
+        [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                    message:alertMessage
+                                   delegate:nil
+                          cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                          otherButtonTitles:nil] show];
+    }
+}
+
 
 /**
  * Open a Facebook page in the FB app or Safari.
@@ -262,7 +361,11 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
             [FBSession.activeSession requestNewPublishPermissions:@[permission]
                                                   defaultAudience:FBSessionDefaultAudienceEveryone
                                                 completionHandler:^(FBSession *session, NSError *error) {
-                                                    handler();
+                                                    if (error) {
+                                                        [self handleRequestPermissionError:error];
+                                                    } else {
+                                                        handler();
+                                                    }
                                                 }];
         }
     } else {
@@ -317,6 +420,11 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                               HTTPMethod:@"POST"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
+                [self handleAPICallError:error
+                           forPermission:@"publish_actions"
+                               retryWith:^{
+                    [req startWithCompletionHandler:nil];
+                }];
                 NSLog(@"Error publishing action: %@", error);
             }
         }];
@@ -335,15 +443,25 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                               HTTPMethod:@"POST"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
-                NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
-                if ([[errDict objectForKey:@"code"] integerValue] != 3501) { // Duplicate error code from FB
-                    NSLog(@"Error publishing like: %@", error);
+                NSDictionary *errDict = [error userInfo][@"error"];
+                if ([errDict[@"code"] integerValue] != 3501) { // Duplicate error code from FB
+                    [self handleAPICallError:error
+                               forPermission:@"publish_actions"
+                                   retryWith:^{
+                                       [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+                                           if (error) {
+                                               NSLog(@"Error publishing like: %@", error);                                               
+                                           }
+                                           if (completion) {
+                                               completion(result[@"id"]);
+                                           }
+                                       }];
+                                   }];
                 }
+            } else if (completion) {
+                completion(result[@"id"]);
             }
-            if (completion) {
-                completion([result objectForKey:@"id"]);
-            }
-        }];
+         }];
     }];
 }
 
@@ -356,6 +474,11 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                               HTTPMethod:@"DELETE"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
+                [self handleAPICallError:error
+                           forPermission:@"publish_actions"
+                               retryWith:^{
+                                   [req startWithCompletionHandler:nil];
+                               }];
                 NSLog(@"Error deleting like: %@", error);
             }
         }];
@@ -376,9 +499,19 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                               HTTPMethod:@"POST"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
-                NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
-                if ([[errDict objectForKey:@"code"] integerValue] != 3501) { // Duplicate achievement error code from FB
-                    NSLog(@"Error publishing achievement: %@", error);
+                NSDictionary *errDict = [error userInfo][@"error"];
+                if ([errDict[@"code"] integerValue] != 3501) { // Duplicate achievement error code from FB
+                    [self handleAPICallError:error
+                               forPermission:@"publish_actions"
+                                   retryWith:^{
+                                       [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+                                           if (error == nil) {
+                                               [_achievements addObject:achievementURL];
+                                           } else {
+                                               NSLog(@"Error publishing achievement: %@", error);                                               
+                                           }
+                                       }];
+                                   }];
                 } else {
                     [_achievements addObject:achievementURL];
                 }
@@ -400,9 +533,19 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                               HTTPMethod:@"DELETE"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
-                NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
-                if ([[errDict objectForKey:@"code"] integerValue] != 3404) { // No such achievement for user error code from FB
-                    NSLog(@"Error deleting achievement: %@", error);
+                NSDictionary *errDict = [error userInfo][@"error"];
+                if ([errDict[@"code"] integerValue] != 3404) { // No such achievement for user error code from FB
+                    [self handleAPICallError:error
+                               forPermission:@"publish_actions"
+                                   retryWith:^{
+                                       [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+                                           if (error == nil) {
+                                               [_achievements removeObject:achievementURL];
+                                           } else {
+                                               NSLog(@"Error deleting achievement: %@", error);
+                                           }
+                                       }];
+                                   }];
                 } else {
                     [_achievements removeObject:achievementURL];
                 }
@@ -425,8 +568,14 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                   HTTPMethod:@"DELETE"];
             [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
                 if (error) {
-                    NSDictionary *errDict = [[error userInfo] objectForKey:@"error"];
-                    if ([[errDict objectForKey:@"code"] integerValue] != 3404) { // No such achievement for user error code from FB
+                    NSDictionary *errDict = [error userInfo][@"error"];
+                    if ([errDict[@"code"] integerValue] != 3404) { // No such achievement for user error code from FB
+                        [self handleAPICallError:error
+                                   forPermission:@"publish_actions"
+                                       retryWith:^{
+                                           [req startWithCompletionHandler:nil];
+                                       }];
+
                         NSLog(@"Error deleting achievement: %@", error);
                     }
                  }
@@ -469,7 +618,21 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                           HTTPMethod:@"GET"];
     [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
         if (error) {
-            NSLog(@"Failed to retrieve FB achievements: %@", error);
+            [self handleAPICallError:error
+                       forPermission:nil
+                           retryWith:^{
+                               [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+                                   if (error == nil) {
+                                       [_achievements removeAllObjects];
+                                       [self processAchievementData:result];
+                                       if (handler) {
+                                           handler(_achievements);
+                                       }
+                                   } else {
+                                       NSLog(@"Failed to retrieve FB achievements: %@", error);
+                                   }
+                               }];
+                           }];
         } else {
             [_achievements removeAllObjects];
             [self processAchievementData:result];
@@ -489,10 +652,19 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                               HTTPMethod:@"POST"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
+                [self handleAPICallError:error
+                           forPermission:@"publish_actions"
+                               retryWith:^{
+                                   [req startWithCompletionHandler:nil];
+                               }];
                 NSLog(@"Error publishing score: %@", error);
             }
         }];
     }];
+}
+
++ (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency {
+    [FBInsights logPurchase:amount currency:currency parameters:@{@"Item":item}];
 }
 
 @end

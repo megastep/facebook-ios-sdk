@@ -141,39 +141,34 @@
     NSLog(@"Users to send to: %@", friendString);
 #endif
     NSMutableDictionary* params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   _message,@"message",
                                    NSLocalizedString(@"Check this app out!",@"Facebook request notification text"), @"notification_text",
                                    nil];
     if (friendString) {
         [params setObject:friendString forKey:@"to"];
     }
     
-    [_facebookUtil.facebook dialog:@"apprequests"
-                         andParams:params
-                       andDelegate:self];
-}
-
-- (void)dialog:(FBDialog *)dialog didFailWithError:(NSError*)error {
-#ifdef DEBUG
-    NSLog(@"FB share dialog failed with error: %@", error);
-#endif
-	if ([error code] == 190) {
-		// Invalid token - force login
-		[_facebookUtil logout];
-		[_facebookUtil login:YES andThen:nil];
-	} else {
-		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
-														message:[NSString stringWithFormat:@"%@.",[error localizedDescription]] 
-													   delegate:nil
-											  cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
-											  otherButtonTitles:nil];
-		[alert show];
-	}
-}
-
-- (void)dialogDidComplete:(FBDialog *)dialog {
-    if ([_facebookUtil.delegate respondsToSelector:@selector(sharedWithFriends)])
-        [_facebookUtil.delegate sharedWithFriends];
+    [FBWebDialogs presentRequestsDialogModallyWithSession:nil
+                                                  message:_message
+                                                    title:[NSString stringWithFormat:NSLocalizedString(@"Share %@ with friends", @"Facebook dialog title to share app"),_facebookUtil.appName]
+                                               parameters:params
+                                                  handler:^(FBWebDialogResult result, NSURL *resultURL, NSError *error) {
+                                                      if (result == FBWebDialogResultDialogCompleted) {
+                                                          if ([_facebookUtil.delegate respondsToSelector:@selector(sharedWithFriends)])
+                                                              [_facebookUtil.delegate sharedWithFriends];
+                                                      }
+                                                      
+                                                      if (error) {
+                                                          if (error.fberrorShouldNotifyUser) {
+                                                              [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                                                                                              message:error.fberrorUserMessage
+                                                                                                             delegate:nil
+                                                                                                    cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                                                                                                    otherButtonTitles:nil] show];
+                                                          } else if (error.fberrorCategory != FBErrorCategoryUserCancelled) {
+                                                              NSLog(@"App Request Dialog Error: %@", error);
+                                                          }
+                                                      }
+                                                  }];
 }
 
 - (void)dealloc
