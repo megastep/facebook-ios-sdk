@@ -200,16 +200,18 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 // Helper method to handle errors during API calls
 - (void)handleAPICallError:(NSError *)error forPermission:(NSString *)perms retryWith:(void (^)(void))recallAPI
 {
-    // Some Graph API errors are retriable. For this sample, we will have a simple
-    // retry policy of one additional attempt.
-
-    if (error.fberrorCategory == FBErrorCategoryRetry ||
-        error.fberrorCategory == FBErrorCategoryThrottling) {
-        // We also retry on a throttling error message. A more sophisticated app
-        // should consider a back-off period.
-        if (recallAPI) {
-            // Recovery tactic: Call API again.
+    if (recallAPI) {
+        // Recovery tactic: Call API again.
+        if (error.fberrorCategory == FBErrorCategoryRetry) {
             recallAPI();
+            return;
+        }
+        
+        if (error.fberrorCategory == FBErrorCategoryThrottling) {
+            // Schedule a little bit later
+            double delayInSeconds = 3.0;
+            dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+            dispatch_after(popTime, dispatch_get_main_queue(), recallAPI);
             return;
         }
     }
