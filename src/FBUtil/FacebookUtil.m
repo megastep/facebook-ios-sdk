@@ -111,6 +111,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 - (id)initWithAppID:(NSString *)appID
        schemeSuffix:(NSString *)suffix
+        clientToken:(NSString *)token
        appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate
@@ -123,6 +124,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         _appSuffix = [suffix copy];
         _delegate = delegate;
         _achievements = [[NSMutableSet alloc] init];
+        [FBSettings setClientToken:token];
         [FBInsights setAppVersion:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
         [self login:NO andThen:nil];
     }

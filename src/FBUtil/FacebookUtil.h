@@ -48,6 +48,7 @@ extern NSString *const FBSessionStateChangedNotification;
 
 - (id)initWithAppID:(NSString *)appID 
        schemeSuffix:(NSString *)suffix
+        clientToken:(NSString *)token
        appNamespace:(NSString *)ns
           fetchUser:(BOOL)fetch
            delegate:(id<FacebookUtilDelegate>)delegate;
