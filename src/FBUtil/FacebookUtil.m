@@ -3,7 +3,7 @@
 //  Utility class to handle common Facebook functionality
 //
 //  Created by Stéphane Peter on 10/17/11.
-//  Copyright (c) 2011-2012 Catloaf Software, LLC. All rights reserved.
+//  Copyright (c) 2011-2013 Catloaf Software, LLC. All rights reserved.
 //
 
 #import "Facebook.h"
@@ -148,7 +148,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         // It is important to handle session closures since they can happen
         // outside of the app. You can inspect the error for more context
         // but this sample generically notifies the user.
-        alertMessage = NSLocalizedString(@"Your current session is no longer valid. Please log in again.", @"Facebook error message");
+        alertMessage = NSLocalizedString(@"Your Facebook session is no longer valid. Please log in again.", @"Facebook error message");
     } else if (error.fberrorCategory == FBErrorCategoryUserCancelled) {
         // The user has cancelled a login. You can inspect the error
         // for more context. For this sample, we will simply ignore it.
@@ -191,7 +191,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
             NSLog(@"Unexpected error requesting permissions:%@", error);
 #endif
             [[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
-                                        message:@"Unable to request publish permissions"
+                                        message:NSLocalizedString(@"Unable to request publish permissions",@"Facebook alert message")
                                        delegate:nil
                               cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
                               otherButtonTitles:nil] show];
