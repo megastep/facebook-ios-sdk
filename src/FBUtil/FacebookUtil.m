@@ -357,7 +357,8 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         NSLog(@"Available permissions: %@", FBSession.activeSession.permissions);
 #endif
         if ([FBSession.activeSession.permissions containsObject:permission]) {
-            handler();
+            if (handler)
+                handler();
         } else {
 #ifdef DEBUG
             NSLog(@"Requesting new permission: %@", permission);
@@ -367,7 +368,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                                                 completionHandler:^(FBSession *session, NSError *error) {
                                                     if (error) {
                                                         [self handleRequestPermissionError:error];
-                                                    } else {
+                                                    } else if (handler) {
                                                         handler();
                                                     }
                                                 }];
