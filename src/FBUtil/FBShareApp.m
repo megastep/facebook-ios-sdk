@@ -23,9 +23,11 @@
     if (self) {
         _facebookUtil = fb;
         _message = [msg copy];
-        if ([_message length] > 60) {
-            NSLog(@"WARNING: FB message is over 60 characters, will almost certainly fail.");
-        }
+
+        // No longer seems to apply...
+//        if ([_message length] > 60) {
+//            NSLog(@"WARNING: FB message is over 60 characters, will almost certainly fail.");
+//        }
     }
     return self;
 }
