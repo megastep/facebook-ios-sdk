@@ -135,6 +135,7 @@
     if ([_fbFriends count] == 0) {
         return;
     }
+    NSAssert(_facebookUtil.appName != nil, @"The FB application name needs to be set for the dialog.");
     
     NSString *friendString = [_fbFriends componentsJoinedByString:@","];
 #ifdef DEBUG
