@@ -42,7 +42,7 @@
         FBOSIntegratedShareDialogHandler fancy = ^(FBOSIntegratedShareDialogResult result, NSError *error) {
             handler((FBNativeDialogResult)result, error);
         };
-        return fancy;
+        return [[fancy copy] autorelease];
     }
     return nil;
 }

@@ -323,7 +323,7 @@ static NSString *const kPostHTTPMethod = @"POST";
 }
 
 + (FBRequest *)requestForUpdateOpenGraphObject:(id<FBOpenGraphObject>)object {
-    return [FBRequest requestForUpdateOpenGraphObjectWithId:object.id graphObject:object];
+    return [FBRequest requestForUpdateOpenGraphObjectWithId:object[@"id"] graphObject:object];
 }
 
 + (FBRequest *)requestForUpdateOpenGraphObjectWithId:(id)objectId
@@ -337,7 +337,7 @@ static NSString *const kPostHTTPMethod = @"POST";
                                                                                              image:image
                                                                                                url:url
                                                                                        description:description];
-    object.id = [FBUtility stringFBIDFromObject:objectId];
+    object[@"id"] = [FBUtility stringFBIDFromObject:objectId];
     return [FBRequest requestForUpdateOpenGraphObject:object];
 }
 
