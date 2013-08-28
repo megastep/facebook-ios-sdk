@@ -125,7 +125,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         _delegate = delegate;
         _achievements = [[NSMutableSet alloc] init];
         [FBSettings setClientToken:token];
-        [FBInsights setAppVersion:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+        [FBSettings setAppVersion:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
         [self login:NO andThen:nil];
     }
     return self;
@@ -668,7 +668,9 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 }
 
 + (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency {
-    [FBInsights logPurchase:amount currency:currency parameters:@{@"Item":item}];
+    [FBAppEvents logPurchase:amount
+                    currency:currency
+                  parameters:@{@"Item":item}];
 }
 
 @end
