@@ -594,7 +594,11 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 - (void)processAchievementData:(id)result {
 
     for (NSDictionary *dict in result[@"data"]) {
-        [_achievements addObject:dict[@"achievement"][@"url"]];
+        if ([dict objectForKey:@"data"]) { // New October 2013 style data change
+            [_achievements addObject:dict[@"data"][@"achievement"][@"url"]];
+        } else if ([dict objectForKey:@"achievement"]) {
+            [_achievements addObject:dict[@"achievement"][@"url"]];
+        }
     }
     NSDictionary *paging = result[@"paging"];
     if (paging[@"next"]) { // need to send another request
