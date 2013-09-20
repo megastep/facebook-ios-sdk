@@ -651,12 +651,12 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     }];
 }
 
-- (void)publishScore:(NSUInteger)score {
+- (void)publishScore:(int64_t)score {
     if (self.publishTimeline)
         return;
     [self doWithPermission:@"publish_actions" toDo:^{
         FBRequest *req = [FBRequest requestWithGraphPath:@"me/scores"
-                                              parameters:@{@"score":[NSString stringWithFormat:@"%d",score]}
+                                              parameters:@{@"score":[NSString stringWithFormat:@"%lld",score]}
                                               HTTPMethod:@"POST"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {

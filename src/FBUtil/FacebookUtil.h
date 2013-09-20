@@ -77,7 +77,7 @@ extern NSString *const FBSessionStateChangedNotification;
 - (BOOL)publishAchievement:(NSString *)achievement;
 - (void)removeAchievement:(NSString *)achievement;
 - (void)removeAllAchievements;
-- (void)publishScore:(NSUInteger)score;
+- (void)publishScore:(int64_t)score;
 
 // Log in-app purchases
 + (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency;
