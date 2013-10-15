@@ -56,7 +56,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                        NSError *error) {
                          if (!error) {
                              _fullname = [user.name copy];
-                             _userID = [user.id copy];
+                             _userID = [[user objectForKey:@"id"] copy]; // Weird trigger for iOS validation from Apple
                              if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)])
                                  [_delegate facebookLoggedIn:_fullname];
                              if (_fromDialog && [_delegate respondsToSelector:@selector(facebookAuthenticated)]) {

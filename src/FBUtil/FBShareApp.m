@@ -72,7 +72,7 @@
                  shouldIncludeUser:(id<FBGraphUserExtraFields>)user
 {
     // Ignore users who are already using the app
-    if ([user.installed boolValue] == YES)
+    if ([[user objectForKey:@"installed"] boolValue] == YES)
         return NO;
     
     NSArray *deviceData = user.devices;
@@ -117,7 +117,7 @@
 #ifdef DEBUG
         NSLog(@"Friend selected: %@", user.name);
 #endif
-        [_fbFriends addObject:user.id];
+        [_fbFriends addObject:[user objectForKey:@"id"]]; // Work around weird iOS validation
     }
     if ([_presenter respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
         [_presenter dismissViewControllerAnimated:YES completion:^{
