@@ -268,6 +268,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 - (void)handleDidBecomeActive {
     [FBSession.activeSession handleDidBecomeActive];
+    [FBAppEvents activateApp];
 }
 
 - (BOOL)login:(BOOL)doAuthorize withPermissions:(NSArray *)perms andThen:(void (^)(void))handler {
@@ -490,7 +491,8 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 }
 
 // Submit the URL to a registered achievement page
-- (BOOL)publishAchievement:(NSString *)achievementURL {
+- (BOOL)publishAchievement:(NSString *)achievementURL
+{
     if (!self.publishTimeline)
         return NO;
     
@@ -669,6 +671,25 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
             }
         }];
     }];
+}
+
+#pragma mark - FB App Events
+
++ (void)logLevelReached:(NSUInteger)level
+{
+    [FBAppEvents logEvent:FBAppEventNameAchievedLevel
+               parameters:@{FBAppEventParameterNameLevel : @(level)}];
+}
+
++ (void)logAchievement:(NSString *)description
+{
+    [FBAppEvents logEvent:FBAppEventNameUnlockedAchievement
+               parameters:@{FBAppEventParameterNameDescription : description}];
+}
+
++ (void)logTutorialCompleted
+{
+    [FBAppEvents logEvent:FBAppEventNameCompletedTutorial];
 }
 
 + (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency {
