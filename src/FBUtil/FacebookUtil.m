@@ -125,6 +125,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         _delegate = delegate;
         _achievements = [[NSMutableSet alloc] init];
         [FBSettings setClientToken:token];
+        [FBSettings setDefaultAppID:appID];
         [FBSettings setAppVersion:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
         [self login:NO andThen:nil];
     }
