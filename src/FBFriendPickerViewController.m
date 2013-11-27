@@ -255,6 +255,11 @@ int const FBRefreshCacheDelaySeconds = 2;
     self.tableView = nil;
 }
 
+- (BOOL)prefersStatusBarHidden
+{
+    return YES;
+}
+
 - (void)configureUsingCachedDescriptor:(FBCacheDescriptor*)cacheDescriptor {
     if (![cacheDescriptor isKindOfClass:[FBFriendPickerCacheDescriptor class]]) {
         [[NSException exceptionWithName:FBInvalidOperationException
