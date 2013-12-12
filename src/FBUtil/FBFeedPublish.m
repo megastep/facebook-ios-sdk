@@ -89,15 +89,16 @@
 
         //  Send a post to the feed for the user with the Graph API
         NSArray *actionLinks = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                         @"<fb:intl>Get The App!</fb:intl>", @"name",
+                                                         @"Get The App!", @"name",
                                                          _appURL, @"link",
                                                          nil
                                                          ]];
+        NSData *actionJSON = [NSJSONSerialization dataWithJSONObject:actionLinks
+                                                             options:0
+                                                               error:&error];
         NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                        NSLocalizedString(@"Care to comment?", @"Facebook user message prompt"), @"message",
-                                       [NSJSONSerialization dataWithJSONObject:actionLinks
-                                                                       options:0 
-                                                                         error:&error], @"actions",
+                                       [NSString stringWithUTF8String:actionJSON.bytes], @"actions",
                                        _imgURL, @"picture",
                                        _name, @"name",
                                        _caption, @"caption",
@@ -105,9 +106,9 @@
                                        _imgLink ? _imgLink : _appURL, @"link",
                                        nil];
         if (_properties) { // Does this even work anymore?
-            [params setObject:[NSJSONSerialization dataWithJSONObject:_properties
-                                                            options:0
-                                                                error:&error]
+            [params setObject:[NSString stringWithUTF8String:[NSJSONSerialization dataWithJSONObject:_properties
+                                                                                             options:0
+                                                                                               error:&error].bytes]
                        forKey:@"properties"];
         }
         
