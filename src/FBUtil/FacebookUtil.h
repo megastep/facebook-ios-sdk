@@ -84,6 +84,7 @@ extern NSString *const FBSessionStateChangedNotification;
 + (void)logAchievement:(NSString *)description;
 + (void)logLevelReached:(NSUInteger)level;
 + (void)logTutorialCompleted;
++ (void)logViewedContentID:(NSString *)contentID type:(NSString *)type;
 
 // Log in-app purchases
 + (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency;

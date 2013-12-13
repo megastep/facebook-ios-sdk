@@ -693,6 +693,13 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     [FBAppEvents logEvent:FBAppEventNameCompletedTutorial];
 }
 
++ (void) logViewedContentID:(NSString *)contentID type:(NSString *)type
+{
+    [FBAppEvents logEvent:FBAppEventNameViewedContent
+               parameters:@{FBAppEventParameterNameContentID : contentID,
+                            FBAppEventParameterNameContentType : type}];
+}
+
 + (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency {
     [FBAppEvents logPurchase:amount
                     currency:currency
