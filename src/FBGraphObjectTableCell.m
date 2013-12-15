@@ -72,6 +72,10 @@ static const CGFloat subtitleHeight = subtitleFontHeight * 1.25;
 
         // Content View
         self.contentView.clipsToBounds = YES;
+        
+        if ([self respondsToSelector:@selector(tintColor)]) {
+            self.tintColor = self.detailTextLabel.textColor;
+        }
     }
 
     return self;
