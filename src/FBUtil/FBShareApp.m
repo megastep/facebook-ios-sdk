@@ -23,11 +23,6 @@
     if (self) {
         _facebookUtil = fb;
         _message = [msg copy];
-
-        // No longer seems to apply...
-//        if ([_message length] > 60) {
-//            NSLog(@"WARNING: FB message is over 60 characters, will almost certainly fail.");
-//        }
     }
     return self;
 }
@@ -36,7 +31,7 @@
     if (FBSession.activeSession.isOpen) {
         _friendPickerController = [[FBFriendPickerViewController alloc] init];
         _friendPickerController.modalPresentationStyle = UIModalPresentationFormSheet;
-        
+
         // Configure the picker ...
         _friendPickerController.title = NSLocalizedString(@"Select Friends",@"Facebook friend picker title");
         // Set this view controller as the friend picker delegate
@@ -74,7 +69,7 @@
                  shouldIncludeUser:(id<FBGraphUserExtraFields>)user
 {
     // Ignore users who are already using the app
-    if ([user.installed boolValue] == YES)
+    if ([[user objectForKey:@"installed"] boolValue] == YES)
         return NO;
     
     NSArray *deviceData = user.devices;
@@ -119,7 +114,7 @@
 #ifdef DEBUG
         NSLog(@"Friend selected: %@", user.name);
 #endif
-        [_fbFriends addObject:user.id];
+        [_fbFriends addObject:[user objectForKey:@"id"]]; // Work around weird iOS validation
     }
     if ([_presenter respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
         [_presenter dismissViewControllerAnimated:YES completion:^{

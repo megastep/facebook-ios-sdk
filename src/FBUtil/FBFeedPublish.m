@@ -8,7 +8,6 @@
 //
 
 #import "FBFeedPublish.h"
-#import "FBSBJSON.h"
 
 @implementation FBFeedPublish {
     FacebookUtil *_facebookUtil;
@@ -58,45 +57,48 @@
                 [nativeDesc appendString:[NSString stringWithFormat:@"%@: %@\n",key,value]];
         }
     }
-    BOOL nativeSuccess = [FBNativeDialogs presentShareDialogModallyFrom:vc
-                                                            initialText:nativeDesc
-                                                                  image:(_imgPath ? [UIImage imageNamed:_imgPath] : nil)
-                                                                    url:[NSURL URLWithString:_appURL]
-                                                                handler:^(FBNativeDialogResult result, NSError *error) {
-                                                                    // Only show the error if it is not due to the dialog
-                                                                    // not being supporte, i.e. code = 7, otherwise ignore
-                                                                    // because our fallback will show the share view controller.
-                                                                    if (error && [error code] == 7) {
-                                                                        return;
-                                                                    }
-                                                                    
-                                                                    if (error) {
-                                                                        if (error.fberrorShouldNotifyUser) {
-                                                                            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
-                                                                                                                            message:error.fberrorUserMessage
-                                                                                                                           delegate:nil
-                                                                                                                  cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
-                                                                                                                  otherButtonTitles:nil];
-                                                                            [alert show];
-                                                                        } else if (error.fberrorCategory != FBErrorCategoryUserCancelled) {
-                                                                            NSLog(@"Native Feed Dialog Error: %@", error);
-                                                                        }
-                                                                    }
-                                                                }];
-    
+    BOOL nativeSuccess = [FBDialogs presentOSIntegratedShareDialogModallyFrom:vc
+                                                                  initialText:nativeDesc
+                                                                        image:(_imgPath ? [UIImage imageNamed:_imgPath] : nil)
+                                                                          url:[NSURL URLWithString:_appURL]
+                                                                      handler:^(FBOSIntegratedShareDialogResult result, NSError *error) {
+                                                                          // Only show the error if it is not due to the dialog
+                                                                          // not being supported, i.e. code = 7, otherwise ignore
+                                                                          // because our fallback will show the share view controller.
+                                                                          if (error && [error code] == 7) {
+                                                                              return;
+                                                                          }
+                                                                          
+                                                                          if (error) {
+                                                                              if (error.fberrorShouldNotifyUser) {
+                                                                                  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Facebook Error",@"Alert title")
+                                                                                                                                  message:error.fberrorUserMessage
+                                                                                                                                 delegate:nil
+                                                                                                                        cancelButtonTitle:NSLocalizedString(@"OK",@"Alert button")
+                                                                                                                        otherButtonTitles:nil];
+                                                                                  [alert show];
+                                                                              } else if (error.fberrorCategory != FBErrorCategoryUserCancelled) {
+                                                                                  NSLog(@"Native Feed Dialog Error: %@", error);
+                                                                              }
+                                                                          }
+                                                                          
+                                                                      }];
+
     if (!nativeSuccess) {
-        FBSBJSON *jsonWriter = [FBSBJSON new];
-        //jsonWriter.humanReadable = YES;
-        
+        NSError *error;
+
         //  Send a post to the feed for the user with the Graph API
         NSArray *actionLinks = [NSArray arrayWithObject:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                         @"<fb:intl>Get The App!</fb:intl>", @"name",
+                                                         @"Get The App!", @"name",
                                                          _appURL, @"link",
                                                          nil
                                                          ]];
+        NSData *actionJSON = [NSJSONSerialization dataWithJSONObject:actionLinks
+                                                             options:0
+                                                               error:&error];
         NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
                                        NSLocalizedString(@"Care to comment?", @"Facebook user message prompt"), @"message",
-                                       [jsonWriter stringWithObject:actionLinks], @"actions",
+                                       [NSString stringWithUTF8String:actionJSON.bytes], @"actions",
                                        _imgURL, @"picture",
                                        _name, @"name",
                                        _caption, @"caption",
@@ -104,7 +106,10 @@
                                        _imgLink ? _imgLink : _appURL, @"link",
                                        nil];
         if (_properties) { // Does this even work anymore?
-            [params setObject:[jsonWriter stringWithObject:_properties] forKey:@"properties"];
+            [params setObject:[NSString stringWithUTF8String:[NSJSONSerialization dataWithJSONObject:_properties
+                                                                                             options:0
+                                                                                               error:&error].bytes]
+                       forKey:@"properties"];
         }
         
         //NSLog(@"Story params: %@", [jsonWriter stringWithObject:params]);

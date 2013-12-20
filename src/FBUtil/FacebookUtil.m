@@ -56,7 +56,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                        NSError *error) {
                          if (!error) {
                              _fullname = [user.name copy];
-                             _userID = [user.id copy];
+                             _userID = [[user objectForKey:@"id"] copy]; // Weird trigger for iOS validation from Apple
                              if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)])
                                  [_delegate facebookLoggedIn:_fullname];
                              if (_fromDialog && [_delegate respondsToSelector:@selector(facebookAuthenticated)]) {
@@ -125,7 +125,8 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
         _delegate = delegate;
         _achievements = [[NSMutableSet alloc] init];
         [FBSettings setClientToken:token];
-        [FBInsights setAppVersion:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
+        [FBSettings setDefaultAppID:appID];
+        [FBSettings setAppVersion:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]];
         [self login:NO andThen:nil];
     }
     return self;
@@ -268,6 +269,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 - (void)handleDidBecomeActive {
     [FBSession.activeSession handleDidBecomeActive];
+    [FBAppEvents activateApp];
 }
 
 - (BOOL)login:(BOOL)doAuthorize withPermissions:(NSArray *)perms andThen:(void (^)(void))handler {
@@ -491,7 +493,8 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 }
 
 // Submit the URL to a registered achievement page
-- (BOOL)publishAchievement:(NSString *)achievementURL {
+- (BOOL)publishAchievement:(NSString *)achievementURL
+{
     if (!self.publishTimeline)
         return NO;
     
@@ -652,12 +655,12 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     }];
 }
 
-- (void)publishScore:(NSUInteger)score {
+- (void)publishScore:(int64_t)score {
     if (self.publishTimeline)
         return;
     [self doWithPermission:@"publish_actions" toDo:^{
         FBRequest *req = [FBRequest requestWithGraphPath:@"me/scores"
-                                              parameters:@{@"score":[NSString stringWithFormat:@"%d",score]}
+                                              parameters:@{@"score":[NSString stringWithFormat:@"%lld",score]}
                                               HTTPMethod:@"POST"];
         [req startWithCompletionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
             if (error) {
@@ -672,8 +675,36 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     }];
 }
 
+#pragma mark - FB App Events
+
++ (void)logLevelReached:(NSUInteger)level
+{
+    [FBAppEvents logEvent:FBAppEventNameAchievedLevel
+               parameters:@{FBAppEventParameterNameLevel : @(level)}];
+}
+
++ (void)logAchievement:(NSString *)description
+{
+    [FBAppEvents logEvent:FBAppEventNameUnlockedAchievement
+               parameters:@{FBAppEventParameterNameDescription : description}];
+}
+
++ (void)logTutorialCompleted
+{
+    [FBAppEvents logEvent:FBAppEventNameCompletedTutorial];
+}
+
++ (void) logViewedContentID:(NSString *)contentID type:(NSString *)type
+{
+    [FBAppEvents logEvent:FBAppEventNameViewedContent
+               parameters:@{FBAppEventParameterNameContentID : contentID,
+                            FBAppEventParameterNameContentType : type}];
+}
+
 + (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency {
-    [FBInsights logPurchase:amount currency:currency parameters:@{@"Item":item}];
+    [FBAppEvents logPurchase:amount
+                    currency:currency
+                  parameters:@{@"Item":item}];
 }
 
 @end

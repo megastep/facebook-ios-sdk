@@ -72,12 +72,19 @@ extern NSString *const FBSessionStateChangedNotification;
 - (void)publishLike:(NSString *)url andThen:(void (^)(NSString *likeID))completion;
 - (void)publishUnlike:(NSString *)likeID;
 
+// Game-specific actions to be published
 - (void)fetchAchievementsAndThen:(void (^)(NSSet *achievements))handler;
 // Returns YES if the achievement was already submitted
 - (BOOL)publishAchievement:(NSString *)achievement;
 - (void)removeAchievement:(NSString *)achievement;
 - (void)removeAllAchievements;
-- (void)publishScore:(NSUInteger)score;
+- (void)publishScore:(int64_t)score;
+
+// Log FB App Events (always logged)
++ (void)logAchievement:(NSString *)description;
++ (void)logLevelReached:(NSUInteger)level;
++ (void)logTutorialCompleted;
++ (void)logViewedContentID:(NSString *)contentID type:(NSString *)type;
 
 // Log in-app purchases
 + (void) logPurchase:(NSString *)item amount:(double)amount currency:(NSString *)currency;
