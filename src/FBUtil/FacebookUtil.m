@@ -3,7 +3,7 @@
 //  Utility class to handle common Facebook functionality
 //
 //  Created by Stéphane Peter on 10/17/11.
-//  Copyright (c) 2011-2013 Catloaf Software, LLC. All rights reserved.
+//  Copyright (c) 2011-2014 Catloaf Software, LLC. All rights reserved.
 //
 
 #import "Facebook.h"
@@ -31,6 +31,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 @synthesize loggedIn = _loggedIn, appName = _appName,
     delegate = _delegate, fullName = _fullname, userID = _userID;
+@synthesize gender = _gender, birthDay = _birthDay;
 
 + (void)initialize {
 	if (self == [FacebookUtil class]) {
@@ -57,6 +58,14 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                          if (!error) {
                              _fullname = [user.name copy];
                              _userID = [[user objectForKey:@"id"] copy]; // Weird trigger for iOS validation from Apple
+                             _gender = [[user objectForKey:@"gender"] copy];
+                             if ([user objectForKey:@"birthday"]) {
+                                 NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+                                 [formatter setDateFormat:@"MM/dd/yyyy"];
+                                 _birthDay = [formatter dateFromString:[user objectForKey:@"birthday"]];
+                             } else {
+                                 _birthDay = nil;
+                             }
                              if ([_delegate respondsToSelector:@selector(facebookLoggedIn:)])
                                  [_delegate facebookLoggedIn:_fullname];
                              if (_fromDialog && [_delegate respondsToSelector:@selector(facebookAuthenticated)]) {
