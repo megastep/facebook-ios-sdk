@@ -10,6 +10,7 @@
 #import "FacebookUtil.h"
 #import "FBShareApp.h"
 #import "FBFeedPublish.h"
+#import "FBGraphPlace.h"
 
 NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionStateChangedNotification";
 
@@ -31,7 +32,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 
 @synthesize loggedIn = _loggedIn, appName = _appName,
     delegate = _delegate, fullName = _fullname, userID = _userID;
-@synthesize gender = _gender, birthDay = _birthDay;
+@synthesize gender = _gender, birthDay = _birthDay, location = _location;
 
 + (void)initialize {
 	if (self == [FacebookUtil class]) {
@@ -59,6 +60,7 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
                              _fullname = [user.name copy];
                              _userID = [[user objectForKey:@"id"] copy]; // Weird trigger for iOS validation from Apple
                              _gender = [[user objectForKey:@"gender"] copy];
+                             _location = [user.location.name copy];
                              if ([user objectForKey:@"birthday"]) {
                                  NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
                                  [formatter setDateFormat:@"MM/dd/yyyy"];

@@ -40,7 +40,7 @@ extern NSString *const FBSessionStateChangedNotification;
 @interface FacebookUtil : NSObject
 
 @property (nonatomic,readonly) BOOL loggedIn, publishTimeline;
-@property (nonatomic,readonly) NSString *fullName, *userID, *gender;
+@property (nonatomic,readonly) NSString *fullName, *userID, *gender, *location;
 @property (nonatomic,readonly) NSDate *birthDay;
 @property (nonatomic,readonly) id<FacebookUtilDelegate> delegate;
 @property (nonatomic,copy) NSString *appName;
