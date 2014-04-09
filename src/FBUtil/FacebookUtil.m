@@ -278,6 +278,15 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 	return NO;
 }
 
++ (BOOL)inBlockedCountry
+{
+    NSDictionary *components = [NSLocale componentsFromLocaleIdentifier:[[NSLocale currentLocale] localeIdentifier]];
+    if ([components[NSLocaleCountryCode] isEqualToString:@"CN"]) { // China
+        return YES;
+    }
+    return NO;
+}
+
 - (void)handleDidBecomeActive {
     [FBSession.activeSession handleDidBecomeActive];
     [FBAppEvents activateApp];

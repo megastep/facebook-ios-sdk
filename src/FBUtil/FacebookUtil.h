@@ -47,6 +47,9 @@ extern NSString *const FBSessionStateChangedNotification;
 
 + (BOOL)openPage:(unsigned long long)uid;
 
+// Try to detect if the user is in a blocked locale (i.e. China)
++ (BOOL)inBlockedCountry;
+
 - (id)initWithAppID:(NSString *)appID 
        schemeSuffix:(NSString *)suffix
         clientToken:(NSString *)token
