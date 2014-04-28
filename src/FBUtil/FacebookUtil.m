@@ -373,7 +373,9 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
     return [FBSession.activeSession handleOpenURL:url];
 }
 
-- (void)doWithPermission:(NSString *)permission toDo:(void (^)(void))handler {
+- (void)doWithPermission:(NSString *)permission
+                    toDo:(void (^)(void))handler
+{
     if (FBSession.activeSession.isOpen) {
 #ifdef DEBUG
         NSLog(@"Available permissions: %@", FBSession.activeSession.permissions);
@@ -385,17 +387,22 @@ NSString *const FBSessionStateChangedNotification = @"com.catloafsoft:FBSessionS
 #ifdef DEBUG
             NSLog(@"Requesting new permission: %@", permission);
 #endif
-            [FBSession.activeSession requestNewPublishPermissions:@[permission]
-                                                  defaultAudience:FBSessionDefaultAudienceEveryone
-                                                completionHandler:^(FBSession *session, NSError *error) {
-                                                    if (error) {
-                                                        [self handleRequestPermissionError:error];
-                                                    } else if (handler) {
-                                                        handler();
-                                                    }
-                                                }];
+            @try {
+                [FBSession.activeSession requestNewPublishPermissions:@[permission]
+                                                      defaultAudience:FBSessionDefaultAudienceEveryone
+                                                    completionHandler:^(FBSession *session, NSError *error) {
+                                                        if (error) {
+                                                            [self handleRequestPermissionError:error];
+                                                        } else if (handler) {
+                                                            handler();
+                                                        }
+                                                    }];
+            }
+            @catch (NSException *exception) { // Avoid crashes here when already in the process of authorizing
+                NSLog(@"Exception received while requesting new permissions: %@", exception);
+            }
         }
-    } else {
+    } else if (FBSession.activeSession.state != FBSessionStateCreatedOpening) {
         [self login:YES withPermissions:[NSArray arrayWithObject:permission] andThen:^{
             [self doWithPermission:permission toDo:handler];
         }];
