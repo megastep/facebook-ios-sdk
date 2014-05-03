@@ -75,6 +75,7 @@ extern NSString *const FBSessionStateChangedNotification;
 - (void)publishAction:(NSString *)action withObject:(NSString *)object objectURL:(NSString *)url;
 - (void)publishLike:(NSString *)url andThen:(void (^)(NSString *likeID))completion;
 - (void)publishUnlike:(NSString *)likeID;
+- (void)publishWatch:(NSString *)videoURL;
 
 // Game-specific actions to be published
 - (void)fetchAchievementsAndThen:(void (^)(NSSet *achievements))handler;
