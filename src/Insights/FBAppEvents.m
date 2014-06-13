@@ -111,6 +111,16 @@ NSString *const FBAppEventNameFBSessionAuthEnd                 = @"fb_mobile_log
 NSString *const FBAppEventNameFBSessionAuthMethodStart         = @"fb_mobile_login_method_start";
 NSString *const FBAppEventNameFBSessionAuthMethodEnd           = @"fb_mobile_login_method_complete";
 
+NSString *const FBAppEventNameFBLikeControlCannotPresentDialog = @"fb_like_control_cannot_present_dialog";
+NSString *const FBAppEventNameFBLikeControlDidDisable          = @"fb_like_control_did_disable";
+NSString *const FBAppEventNameFBLikeControlDidLike             = @"fb_like_control_did_like";
+NSString *const FBAppEventNameFBLikeControlDidPresentDialog    = @"fb_like_control_did_present_dialog";
+NSString *const FBAppEventNameFBLikeControlDidTap              = @"fb_like_control_did_tap";
+NSString *const FBAppEventNameFBLikeControlDidUnlike           = @"fb_like_control_did_unlike";
+NSString *const FBAppEventNameFBLikeControlError               = @"fb_like_control_error";
+NSString *const FBAppEventNameFBLikeControlImpression          = @"fb_like_control_impression";
+NSString *const FBAppEventNameFBLikeControlNetworkUnavailable  = @"fb_like_control_network_unavailable";
+
 // Event Parameters internal to this file
 NSString *const FBAppEventParameterConversionPixelID           = @"fb_offsite_pixel_id";
 NSString *const FBAppEventParameterConversionPixelValue        = @"fb_offsite_pixel_value";
@@ -656,6 +666,7 @@ const int MAX_IDENTIFIER_LENGTH                      = 40;
 
     NSString *jsonEncodedEvents;
     NSUInteger eventCount, numSkipped;
+    BOOL allEventsAreImplicit;
     @synchronized (appEventsState) {
 
         [appEventsState.inFlightEvents addObjectsFromArray:appEventsState.accumulatedEvents];
@@ -666,6 +677,7 @@ const int MAX_IDENTIFIER_LENGTH                      = 40;
             return;
         }
 
+        allEventsAreImplicit = [appEventsState areAllEventsImplicit];
         jsonEncodedEvents = [appEventsState jsonEncodeInFlightEvents:self.appSupportsImplicitLogging];
         numSkipped = appEventsState.numSkippedEventsDueToFullBuffer;
     }
@@ -692,7 +704,8 @@ const int MAX_IDENTIFIER_LENGTH                      = 40;
     }
 
     [self appendAttributionAndAdvertiserIDs:postParameters
-                                              session:session];
+                                    session:session
+                        accessAdvertisingID:!allEventsAreImplicit];
 
     NSString *loggingEntry = nil;
     if ([[FBSettings loggingBehavior] containsObject:FBLoggingBehaviorAppEvents]) {
@@ -730,7 +743,8 @@ const int MAX_IDENTIFIER_LENGTH                      = 40;
 }
 
 - (void)appendAttributionAndAdvertiserIDs:(NSMutableDictionary *)postParameters
-                                            session:(FBSession *)session {
+                                  session:(FBSession *)session
+                     accessAdvertisingID:(BOOL)accessAdvertisingID {
 
     if (self.appSupportsAttributionStatus == AppSupportsAttributionTrue) {
         NSString *attributionID = [FBUtility attributionID];
@@ -741,13 +755,17 @@ const int MAX_IDENTIFIER_LENGTH                      = 40;
 
     // Send advertiserID if available, and send along whether tracking is enabled too.  That's because
     // we can use the advertiser_id for non-tracking purposes (aggregated Insights/demographics) that doesn't
-    // result in advertising targeting that user.
-    NSString *advertiserID = [FBUtility advertiserID];
-    if (advertiserID) {
-        [postParameters setObject:advertiserID forKey:@"advertiser_id"];
+    // result in advertising targeting that user.  Note that we do not send it when the events only include
+    // implicit events.
+    if (accessAdvertisingID) {
+        NSString *advertiserID = [FBUtility advertiserID];
+        if (advertiserID) {
+            [postParameters setObject:advertiserID forKey:@"advertiser_id"];
+        }
     }
 
-    [FBUtility updateParametersWithEventUsageLimitsAndBundleInfo:postParameters];
+    [FBUtility updateParametersWithEventUsageLimitsAndBundleInfo:postParameters
+                                 accessAdvertisingTrackingStatus:accessAdvertisingID];
 }
 
 - (BOOL)doesSessionHaveUserToken:(FBSession *)session {
